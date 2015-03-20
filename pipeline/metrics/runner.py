@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import csv
-import itertools
 import argparse
 import sys
+import collections
 
 from pipeline.metrics.rice_index import RiceIndex
 
@@ -33,40 +33,41 @@ class Runner(object):
                     1,1,1
 
         Returns:
-            dict: A dict with each poll name in the keys and the resulting
-                adjusted Rice Index in the values.
+            OrderedDict: A dict with each poll name in the keys and the
+                resulting adjusted Rice Index in the values.
         """
         with open(csv_path) as csv_file:
             metric_method = RiceIndex('1', '0').calculate_adjusted
-            votes = [v for v in csv.DictReader(csv_file)]
+            reader = csv.reader(csv_file)
+            headers = next(reader)
+            votes = [v for v in reader]
 
-        return cls.calculate_metric(votes, metric_method)
+        metrics = cls.calculate_metric(votes, metric_method)
+        return collections.OrderedDict(zip(headers, metrics))
 
     @classmethod
     def calculate_metric(cls, votes, metric_method):
         """Takes list of poll votes and returns result of metric on each poll.
 
         Args:
-            votes (list of dicts): List of vote dicts. Each element represent
+            votes (list of lists): List of vote lists. Each element represent
                 a person (or group) votes on a number of polls. The structure
                 looks like:
-                    [{'poll1': 0, 'poll2': 1}, {'poll1': 1, 'poll2': 1}]
+                    [[0, 1], [1, 1]]
                 This would usually be the result of loading a CSV file.
             metric_method (method): Method that receives a list of votes and
                 return a single value.
 
         Returns:
-            dict: Dictionary mapping each poll to the result of executing
-                metric_method on its votes. For example:
-                    {'poll1': 0, 'poll2': 1}
+            list: Result of executing metric_method on each poll. The order of
+                the list is the same as the votes received. For example:
+                    [0, 1]
         """
-        vote_names = [v.keys() for v in votes]
-        unique_vote_names = set(itertools.chain.from_iterable(vote_names))
-        result = {}
+        result = []
 
-        for vote_name in unique_vote_names:
-            the_votes = [v[vote_name] for v in votes]
-            result[vote_name] = metric_method(the_votes)
+        for column_index in range(0, len(votes[0])):
+            the_votes = [v[column_index] for v in votes]
+            result.append(metric_method(the_votes))
 
         return result
 
