@@ -6,15 +6,11 @@ import unittest
 from pipeline.metrics.runner import Runner
 
 
-YES = 1
-NO = 0
-
-
 class TestRunner(unittest.TestCase):
     def test_run(self):
         votes = [
-            {'vote1': NO, 'vote2': YES, 'vote3': NO},
-            {'vote1': YES, 'vote2': NO, 'vote3': YES},
+            {'vote1': 0, 'vote2': 1, 'vote3': 0},
+            {'vote1': 1, 'vote2': 0, 'vote3': 1},
         ]
         result = {
             'vote1': votes[0]['vote1'],
