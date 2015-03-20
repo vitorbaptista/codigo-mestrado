@@ -2,22 +2,21 @@
 
 
 class RiceIndex(object):
-    YES = 1
-    NO = 0
+    def __init__(self, yes_value=1, no_value=0):
+        self.yes = yes_value
+        self.no = no_value
 
-    @classmethod
-    def calculate(cls, votes):
+    def calculate(self, votes):
         """Calculates the Rice Index ignoring null votes."""
-        num_yes = votes.count(cls.YES)
-        num_no = votes.count(cls.NO)
+        num_yes = votes.count(self.yes)
+        num_no = votes.count(self.no)
         total = num_yes + num_no
 
         return abs(num_yes - num_no) / total
 
-    @classmethod
-    def calculate_adjusted(cls, votes):
+    def calculate_adjusted(self, votes):
         """Calculates the Adjusted Rice Index ignoring null votes."""
-        rice_index = cls.calculate(votes)
-        total = votes.count(cls.YES) + votes.count(cls.NO)
+        rice_index = self.calculate(votes)
+        total = votes.count(self.yes) + votes.count(self.no)
 
         return (total * (rice_index ** 2) + total - 2) / (2 * (total - 1))

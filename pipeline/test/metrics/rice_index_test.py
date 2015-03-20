@@ -11,9 +11,9 @@ NO = 0
 
 
 class TestRiceIndex(unittest.TestCase):
-    def test_yes_and_no_values(self):
-        self.assertEqual(RiceIndex.YES, YES)
-        self.assertEqual(RiceIndex.NO, NO)
+    def test_default_yes_and_no_values(self):
+        self.assertEqual(RiceIndex().yes, YES)
+        self.assertEqual(RiceIndex().no, NO)
 
     def test_calculate_rice_index(self):
         test_cases = [
@@ -28,7 +28,7 @@ class TestRiceIndex(unittest.TestCase):
             result = test_case['result']
 
             with self.subTest(test=test, result=result):
-                self.assertEqual(RiceIndex.calculate(test), result)
+                self.assertEqual(RiceIndex().calculate(test), result)
 
     def test_calculate_adjusted_rice_index(self):
         test_cases = [
@@ -42,4 +42,4 @@ class TestRiceIndex(unittest.TestCase):
             result = test_case['result']
 
             with self.subTest(test=test, result=result):
-                self.assertEqual(RiceIndex.calculate_adjusted(test), result)
+                self.assertEqual(RiceIndex().calculate_adjusted(test), result)
