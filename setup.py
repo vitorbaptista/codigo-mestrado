@@ -9,6 +9,7 @@ setup(
     name='pipeline',
     version=__version__,
     packages=['pipeline', 'pipeline.metrics'],
+    scripts=['bin/rice_index'],
     author='Vitor Baptista',
     author_email='vitor@vitorbaptista.com',
     test_suite='pipeline.test',
