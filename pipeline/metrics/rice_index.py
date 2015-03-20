@@ -7,20 +7,26 @@ class RiceIndex(object):
         self.no = no_value
 
     def calculate(self, votes):
-        """Calculates the Rice Index ignoring null votes."""
+        """Calculates the Rice Index ignoring null votes.
+
+        If there's none or only one non-null vote, it'll return None
+        """
         num_yes = votes.count(self.yes)
         num_no = votes.count(self.no)
         total = num_yes + num_no
-        if total == 0:
+        if total < 2:
             return
 
         return abs(num_yes - num_no) / total
 
     def calculate_adjusted(self, votes):
-        """Calculates the Adjusted Rice Index ignoring null votes."""
+        """Calculates the Adjusted Rice Index ignoring null votes.
+
+        If there's none or only one non-null vote, it'll return None
+        """
         rice_index = self.calculate(votes)
         total = votes.count(self.yes) + votes.count(self.no)
-        if total == 0:
+        if total < 2:
             return
 
         return (total * (rice_index ** 2) + total - 2) / (2 * (total - 1))

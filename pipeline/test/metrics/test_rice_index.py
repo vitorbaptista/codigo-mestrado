@@ -22,6 +22,8 @@ class TestRiceIndex(unittest.TestCase):
             {'test': [NO, NO, NO], 'result': 1},
             {'test': [NO, YES, YES, YES], 'result': 0.5},
             {'test': [NO, YES, YES, YES, None], 'result': 0.5},
+            {'test': [NO], 'result': None},
+            {'test': [YES, None], 'result': None},
             {'test': [None, None], 'result': None},
             {'test': [], 'result': None},
         ]
@@ -38,6 +40,8 @@ class TestRiceIndex(unittest.TestCase):
             {'test': [NO, YES, None], 'result': 0},
             {'test': [NO, NO, YES, YES], 'result': 0.3333333333333333},
             {'test': [NO, NO, NO, YES, YES, YES], 'result': 0.4},
+            {'test': [YES], 'result': None},
+            {'test': [YES, None], 'result': None},
             {'test': [None, None], 'result': None},
             {'test': [], 'result': None},
         ]
