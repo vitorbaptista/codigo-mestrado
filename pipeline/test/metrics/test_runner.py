@@ -37,6 +37,69 @@ class TestRunner(unittest.TestCase):
         res = Runner.main(csv_path)
         self.assertEqual(res, expected_result)
 
+    def test_main_filtering_by_names(self):
+        csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
+        expected_result = collections.OrderedDict([
+            ('poll1', 1),
+            ('poll2', 0),
+            ('poll3', None),
+            ('poll4', None),
+        ])
+
+        res = Runner.main(csv_path, name=['Joao', 'Pedro'])
+        self.assertEqual(res, expected_result)
+
+    def test_main_filtering_by_parties(self):
+        csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
+        expected_result = collections.OrderedDict([
+            ('poll1', 1),
+            ('poll2', None),
+            ('poll3', None),
+            ('poll4', None),
+        ])
+
+        res = Runner.main(csv_path, party=['PV', 'PSOL'])
+        self.assertEqual(res, expected_result)
+
+    def test_main_filtering_by_state(self):
+        csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
+        expected_result = collections.OrderedDict([
+            ('poll1', 1),
+            ('poll2', 0),
+            ('poll3', None),
+            ('poll4', None),
+        ])
+
+        res = Runner.main(csv_path, state=['PB', 'PE'])
+        self.assertEqual(res, expected_result)
+
+    def test_main_filtering_ignores_empty_filters(self):
+        csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
+        expected_result = collections.OrderedDict([
+            ('poll1', 0.4),
+            ('poll2', 0.0),
+            ('poll3', None),
+            ('poll4', None),
+        ])
+
+        res = Runner.main(csv_path, name=[], party=[], state=[])
+        self.assertEqual(res, expected_result)
+
+    def test_main_filtering_by_multiple_criteria(self):
+        csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
+        expected_result = collections.OrderedDict([
+            ('poll1', 0.0),
+            ('poll2', None),
+            ('poll3', None),
+            ('poll4', None),
+        ])
+
+        res = Runner.main(csv_path,
+                          name=['Joao', 'Natalia'],
+                          party=['PT', 'PSOL'],
+                          state=['PB', 'RJ'])
+        self.assertEqual(res, expected_result)
+
     def test_main_removes_metadata_columns_from_result(self):
         csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
         metadata_columns = ['name', 'party', 'state']

@@ -17,14 +17,17 @@ class Runner(object):
 
     def run(self, args=sys.argv[1:], output=sys.stdout):
         options = self.parser.parse_args(args)
-        result = self.__class__.main(options.csv_path[0])
+        result = self.__class__.main(options.csv_path[0],
+                                     name=options.name,
+                                     party=options.party,
+                                     state=options.state)
 
         writer = csv.DictWriter(output, fieldnames=result.keys())
         writer.writeheader()
         writer.writerow(result)
 
     @classmethod
-    def main(cls, csv_path):
+    def main(cls, csv_path, **filters):
         """Calculates the adjusted Rice Index polls contained in a CSV
 
         Args:
@@ -40,13 +43,22 @@ class Runner(object):
                 resulting adjusted Rice Index in the values.
         """
         votes = pd.DataFrame.from_csv(csv_path, index_col=None)
+        metric_method = RiceIndex().calculate_adjusted
+        metadata = []
         try:
             metadata_columns = ['name', 'party', 'state']
+            metadata = votes[metadata_columns]
             votes = votes.drop(metadata_columns, axis=1)
-        except ValueError:
+        except (ValueError, KeyError):
             # Ignore if votes don't have the metadata_columns
             pass
-        metric_method = RiceIndex().calculate_adjusted
+
+        if (len(metadata)):
+            for key, values in filters.items():
+                if (not values):
+                    continue
+                criterion = metadata[key].map(lambda k: k in values)
+                votes = votes[criterion]
 
         metrics = cls.calculate_metric(votes, metric_method)
         return collections.OrderedDict(zip(votes.columns, metrics))
@@ -86,5 +98,17 @@ class Runner(object):
         parser.add_argument(
             "csv_path", nargs=1, type=str,
             help="path for CSV with polls as columns and rows with votes"
+        )
+        parser.add_argument(
+            "--name", nargs="*", type=str, default=[],
+            help="deputies to use when calculating cohesion (default: all)"
+        )
+        parser.add_argument(
+            "--party", nargs="*", type=str, default=[],
+            help="parties to use when calculating cohesion (default: all)"
+        )
+        parser.add_argument(
+            "--state", nargs="*", type=str, default=[],
+            help="states to use when calculating cohesion (default: all)"
         )
         return parser
