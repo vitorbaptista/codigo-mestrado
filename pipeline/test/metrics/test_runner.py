@@ -26,8 +26,7 @@ class TestRunner(unittest.TestCase):
         self.assertEqual(result, expected_result)
 
     def test_main(self):
-        base_path = os.path.dirname(os.path.realpath(__file__))
-        csv_path = os.path.join(base_path, 'data', 'example_votes.csv')
+        csv_path = self.__get_csv_path('example_votes.csv')
         expected_result = collections.OrderedDict([
             ('poll1', 0.4),
             ('poll2', 0.0),
