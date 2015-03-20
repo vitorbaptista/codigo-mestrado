@@ -7,8 +7,9 @@ class RiceIndex(object):
 
     @classmethod
     def calculate(cls, votes):
+        """Calculates the Rice Index ignoring null votes."""
         num_yes = votes.count(cls.YES)
         num_no = votes.count(cls.NO)
-        total = len(votes)
+        total = num_yes + num_no
 
         return abs(num_yes - num_no) / total
