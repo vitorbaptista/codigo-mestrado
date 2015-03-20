@@ -28,10 +28,10 @@ class Runner(object):
             metric_method = RiceIndex('1', '0').calculate_adjusted
             votes = [v for v in csv.DictReader(csv_file)]
 
-        return cls.run(votes, metric_method)
+        return cls.calculate_metric(votes, metric_method)
 
     @classmethod
-    def run(cls, votes, metric_method):
+    def calculate_metric(cls, votes, metric_method):
         """Takes list of poll votes and returns result of metric on each poll.
 
         Args:
