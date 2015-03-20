@@ -11,8 +11,7 @@ from pipeline.metrics.runner import Runner
 
 class TestRunner(unittest.TestCase):
     def test_run_writes_result_in_output(self):
-        base_path = os.path.dirname(os.path.realpath(__file__))
-        csv_path = os.path.join(base_path, 'data', 'example_votes.csv')
+        csv_path = self.__get_csv_path('example_votes.csv')
         args = [csv_path]
         output = io.StringIO()
         expected_result = [
@@ -38,6 +37,15 @@ class TestRunner(unittest.TestCase):
 
         res = Runner.main(csv_path)
         self.assertEqual(res, expected_result)
+
+    def test_main_removes_metadata_columns_from_result(self):
+        csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
+        metadata_columns = ['name', 'party', 'state']
+        res = Runner.main(csv_path)
+
+        for metadata_column in metadata_columns:
+            with self.subTest(metadata_column=metadata_column):
+                self.assertNotIn(metadata_column, res)
 
     def test_calculate_metric(self):
         votes = [
@@ -69,3 +77,8 @@ class TestRunner(unittest.TestCase):
 
         result = Runner.calculate_metric(votes, mock_calculate)
         self.assertEqual(result, expected_result)
+
+    def __get_csv_path(self, filename):
+        base_path = os.path.dirname(os.path.realpath(__file__))
+        data_path = os.path.join(base_path, 'data')
+        return os.path.join(data_path, filename)

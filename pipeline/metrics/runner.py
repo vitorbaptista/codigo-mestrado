@@ -40,6 +40,12 @@ class Runner(object):
                 resulting adjusted Rice Index in the values.
         """
         votes = pd.DataFrame.from_csv(csv_path, index_col=None)
+        try:
+            metadata_columns = ['name', 'party', 'state']
+            votes = votes.drop(metadata_columns, axis=1)
+        except ValueError:
+            # Ignore if votes don't have the metadata_columns
+            pass
         metric_method = RiceIndex().calculate_adjusted
 
         metrics = cls.calculate_metric(votes, metric_method)
