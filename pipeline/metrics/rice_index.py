@@ -11,6 +11,8 @@ class RiceIndex(object):
         num_yes = votes.count(self.yes)
         num_no = votes.count(self.no)
         total = num_yes + num_no
+        if total == 0:
+            return
 
         return abs(num_yes - num_no) / total
 
@@ -18,5 +20,7 @@ class RiceIndex(object):
         """Calculates the Adjusted Rice Index ignoring null votes."""
         rice_index = self.calculate(votes)
         total = votes.count(self.yes) + votes.count(self.no)
+        if total == 0:
+            return
 
         return (total * (rice_index ** 2) + total - 2) / (2 * (total - 1))

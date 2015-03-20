@@ -22,6 +22,8 @@ class TestRiceIndex(unittest.TestCase):
             {'test': [NO, NO, NO], 'result': 1},
             {'test': [NO, YES, YES, YES], 'result': 0.5},
             {'test': [NO, YES, YES, YES, None], 'result': 0.5},
+            {'test': [None, None], 'result': None},
+            {'test': [], 'result': None},
         ]
         for test_case in test_cases:
             test = test_case['test']
@@ -36,6 +38,8 @@ class TestRiceIndex(unittest.TestCase):
             {'test': [NO, YES, None], 'result': 0},
             {'test': [NO, NO, YES, YES], 'result': 0.3333333333333333},
             {'test': [NO, NO, NO, YES, YES, YES], 'result': 0.4},
+            {'test': [None, None], 'result': None},
+            {'test': [], 'result': None},
         ]
         for test_case in test_cases:
             test = test_case['test']
