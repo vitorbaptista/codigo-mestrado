@@ -11,6 +11,7 @@ class RiceIndex(object):
 
         If there's none or only one non-null vote, it'll return None
         """
+        votes = list(votes)
         num_yes = votes.count(self.yes)
         num_no = votes.count(self.no)
         total = num_yes + num_no
@@ -24,6 +25,7 @@ class RiceIndex(object):
 
         If there's none or only one non-null vote, it'll return None
         """
+        votes = list(votes)
         rice_index = self.calculate(votes)
         total = votes.count(self.yes) + votes.count(self.no)
         if total < 2:

@@ -5,6 +5,9 @@ import argparse
 import sys
 import collections
 
+import numpy as np
+import pandas as pd
+
 from pipeline.metrics.rice_index import RiceIndex
 
 
@@ -36,14 +39,11 @@ class Runner(object):
             OrderedDict: A dict with each poll name in the keys and the
                 resulting adjusted Rice Index in the values.
         """
-        with open(csv_path) as csv_file:
-            metric_method = RiceIndex('1', '0').calculate_adjusted
-            reader = csv.reader(csv_file)
-            headers = next(reader)
-            votes = [v for v in reader]
+        votes = pd.DataFrame.from_csv(csv_path, index_col=None)
+        metric_method = RiceIndex().calculate_adjusted
 
         metrics = cls.calculate_metric(votes, metric_method)
-        return collections.OrderedDict(zip(headers, metrics))
+        return collections.OrderedDict(zip(votes.columns, metrics))
 
     @classmethod
     def calculate_metric(cls, votes, metric_method):
@@ -65,9 +65,10 @@ class Runner(object):
         """
         result = []
 
-        if (votes):
+        if (len(votes) != 0):
+            votes = np.array(votes)
             for column_index in range(0, len(votes[0])):
-                the_votes = [v[column_index] for v in votes]
+                the_votes = votes[:, column_index]
                 result.append(metric_method(the_votes))
 
         return result

@@ -10,8 +10,14 @@ setup(
     version=__version__,
     packages=['pipeline', 'pipeline.metrics'],
     scripts=['bin/rice_index'],
+    test_suite='pipeline.test',
+
+    install_requires=[
+        'numpy>=0.9',
+        'pandas>=0.15',
+    ],
+
     author='Vitor Baptista',
     author_email='vitor@vitorbaptista.com',
-    test_suite='pipeline.test',
     license='MIT',
 )
