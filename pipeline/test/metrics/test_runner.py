@@ -10,7 +10,7 @@ YES = 1
 NO = 0
 
 
-class RunnerTest(unittest.TestCase):
+class TestRunner(unittest.TestCase):
     def test_run(self):
         votes = [
             {'vote1': NO, 'vote2': YES, 'vote3': NO},
