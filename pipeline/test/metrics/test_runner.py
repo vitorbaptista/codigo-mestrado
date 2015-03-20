@@ -53,3 +53,19 @@ class TestRunner(unittest.TestCase):
 
         result = Runner.calculate_metric(votes, mock_calculate)
         self.assertEqual(result, expected_result)
+
+    def test_calculate_metric_with_empty_polls(self):
+        votes = []
+        expected_result = []
+        mock_calculate = lambda votes: votes[0]
+
+        result = Runner.calculate_metric(votes, mock_calculate)
+        self.assertEqual(result, expected_result)
+
+    def test_calculate_metric_with_empty_votes(self):
+        votes = [[]]
+        expected_result = []
+        mock_calculate = lambda votes: votes[0]
+
+        result = Runner.calculate_metric(votes, mock_calculate)
+        self.assertEqual(result, expected_result)

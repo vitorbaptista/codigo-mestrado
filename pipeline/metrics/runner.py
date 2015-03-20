@@ -65,9 +65,10 @@ class Runner(object):
         """
         result = []
 
-        for column_index in range(0, len(votes[0])):
-            the_votes = [v[column_index] for v in votes]
-            result.append(metric_method(the_votes))
+        if (votes):
+            for column_index in range(0, len(votes[0])):
+                the_votes = [v[column_index] for v in votes]
+                result.append(metric_method(the_votes))
 
         return result
 
