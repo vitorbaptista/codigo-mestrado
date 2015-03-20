@@ -29,3 +29,17 @@ class TestRiceIndex(unittest.TestCase):
 
             with self.subTest(test=test, result=result):
                 self.assertEqual(RiceIndex.calculate(test), result)
+
+    def test_calculate_adjusted_rice_index(self):
+        test_cases = [
+            {'test': [NO, YES], 'result': 0},
+            {'test': [NO, YES, None], 'result': 0},
+            {'test': [NO, NO, YES, YES], 'result': 0.3333333333333333},
+            {'test': [NO, NO, NO, YES, YES, YES], 'result': 0.4},
+        ]
+        for test_case in test_cases:
+            test = test_case['test']
+            result = test_case['result']
+
+            with self.subTest(test=test, result=result):
+                self.assertEqual(RiceIndex.calculate_adjusted(test), result)
