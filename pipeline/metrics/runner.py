@@ -1,10 +1,35 @@
 # -*- coding: utf-8 -*-
 
 
+import csv
 import itertools
+
+from pipeline.metrics.rice_index import RiceIndex
 
 
 class Runner(object):
+    @classmethod
+    def main(cls, csv_path):
+        """Calculates the adjusted Rice Index polls contained in a CSV
+
+        Args:
+            csv_path (string): Path to a CSV file with polls as columns and
+                people/groups' votes as rows. The votes should be either 1 for
+                YES, 2 for NO, or empty for Not Voted. Example:
+                    poll1,poll2,poll3
+                    0,,1
+                    1,1,1
+
+        Returns:
+            dict: A dict with each poll name in the keys and the resulting
+                adjusted Rice Index in the values.
+        """
+        with open(csv_path) as csv_file:
+            metric_method = RiceIndex('1', '0').calculate_adjusted
+            votes = [v for v in csv.DictReader(csv_file)]
+
+        return cls.run(votes, metric_method)
+
     @classmethod
     def run(cls, votes, metric_method):
         """Takes list of poll votes and returns result of metric on each poll.

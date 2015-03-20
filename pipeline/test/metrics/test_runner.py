@@ -2,11 +2,24 @@
 
 
 import unittest
+import os
 
 from pipeline.metrics.runner import Runner
 
 
 class TestRunner(unittest.TestCase):
+    def test_main(self):
+        base_path = os.path.dirname(os.path.realpath(__file__))
+        csv_path = os.path.join(base_path, 'data', 'example_votes.csv')
+        expected_result = {
+            'poll1': 0.4,
+            'poll2': 0.0,
+            'poll3': None,
+            'poll4': None,
+        }
+
+        self.assertEqual(Runner.main(csv_path), expected_result)
+
     def test_run(self):
         votes = [
             {'vote1': 0, 'vote2': 1, 'vote3': 0},
