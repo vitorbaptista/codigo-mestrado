@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
 import unittest
 
 from pipeline.metrics.rice_index import RiceIndex
