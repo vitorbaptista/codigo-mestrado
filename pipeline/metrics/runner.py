@@ -2,11 +2,24 @@
 
 import csv
 import itertools
+import argparse
+import sys
 
 from pipeline.metrics.rice_index import RiceIndex
 
 
 class Runner(object):
+    def __init__(self):
+        self.parser = self.__create_parser()
+
+    def run(self, args=sys.argv[1:], output=sys.stdout):
+        options = self.parser.parse_args(args)
+        result = self.__class__.main(options.csv_path[0])
+
+        writer = csv.DictWriter(output, fieldnames=result.keys())
+        writer.writeheader()
+        writer.writerow(result)
+
     @classmethod
     def main(cls, csv_path):
         """Calculates the adjusted Rice Index polls contained in a CSV
@@ -56,3 +69,13 @@ class Runner(object):
             result[vote_name] = metric_method(the_votes)
 
         return result
+
+    def __create_parser(self):
+        parser = argparse.ArgumentParser(
+            description="Calculates adjusted rice index on a CSV with votes"
+        )
+        parser.add_argument(
+            "csv_path", nargs=1, type=str,
+            help="path for CSV with polls as columns and rows with votes"
+        )
+        return parser
