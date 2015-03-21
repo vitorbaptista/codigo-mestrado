@@ -19,18 +19,17 @@ class Runner(object):
 
     def run(self, args=sys.argv[1:], output=sys.stdout):
         options = self.parser.parse_args(args)
-        result = self.__class__.main(options.csv_path,
-                                     options.groupby,
-                                     name=options.name,
-                                     party=options.party,
-                                     state=options.state)
+        result = self.main(options.csv_path,
+                           options.groupby,
+                           name=options.name,
+                           party=options.party,
+                           state=options.state)
 
         writer = csv.DictWriter(output, fieldnames=result.keys())
         writer.writeheader()
         writer.writerow(result)
 
-    @classmethod
-    def main(cls, csv_path, groupby=None, **filters):
+    def main(self, csv_path, groupby=None, **filters):
         """Calculates the adjusted Rice Index polls contained in a CSV
 
         Args:
@@ -52,42 +51,53 @@ class Runner(object):
             OrderedDict: A dict with each poll name in the keys and the
                 resulting adjusted Rice Index in the values.
         """
-        votes = pd.DataFrame.from_csv(csv_path, index_col=None)
         metric_method = RiceIndex().calculate_adjusted
+        votes, metadata = self.__read_votes_and_metadata(csv_path)
+
+        if len(metadata):
+            votes, metadata = self.__apply_filters(votes, metadata, filters)
+
+        if groupby and groupby in metadata:
+            votes = self.__get_groups_median_votes(votes, metadata, groupby)
+
+        metrics = self.calculate_metric(votes, metric_method)
+
+        return collections.OrderedDict(zip(votes.columns, metrics))
+
+    def __read_votes_and_metadata(self, csv_path):
+        votes = pd.DataFrame.from_csv(csv_path, index_col=None)
         metadata = []
         try:
-            metadata = votes[cls.METADATA_COLUMNS]
-            votes = votes.drop(cls.METADATA_COLUMNS, axis=1)
+            metadata = votes[self.METADATA_COLUMNS]
+            votes = votes.drop(self.METADATA_COLUMNS, axis=1)
         except (ValueError, KeyError):
             # Ignore if votes don't have the metadata_columns
             pass
+        return votes, metadata
 
-        if len(metadata):
-            criteria = []
-            for key, values in filters.items():
-                if not values:
-                    continue
-                criterion = metadata[key].map(lambda k: k in values)
-                if len(criteria) == 0:
-                    criteria = criterion
-                criteria = criteria & criterion
-            if len(criteria):
-                metadata = metadata[criteria]
-                votes = votes[criteria]
+    def __apply_filters(self, votes, metadata, filters):
+        criteria = []
+        for key, values in filters.items():
+            if not values:
+                continue
+            criterion = metadata[key].map(lambda k: k in values)
+            if len(criteria) == 0:
+                criteria = criterion
+            criteria = criteria & criterion
+        if len(criteria):
+            metadata = metadata[criteria]
+            votes = votes[criteria]
+        return votes, metadata
 
-        if groupby and groupby in metadata:
-            def mode_removing_nulls(arr):
-                res = mode(arr[pd.notnull(arr)])[0]
-                if len(res):
-                    return res[0]
-            votes = votes.groupby(metadata[groupby])\
-                         .aggregate(mode_removing_nulls)
+    def __get_groups_median_votes(self, votes, metadata, groupby):
+        def mode_removing_nulls(arr):
+            res = mode(arr[pd.notnull(arr)])[0]
+            if len(res):
+                return res[0]
+        return votes.groupby(metadata[groupby])\
+                    .aggregate(mode_removing_nulls)
 
-        metrics = cls.calculate_metric(votes, metric_method)
-        return collections.OrderedDict(zip(votes.columns, metrics))
-
-    @classmethod
-    def calculate_metric(cls, votes, metric_method):
+    def calculate_metric(self, votes, metric_method):
         """Takes list of poll votes and returns result of metric on each poll.
 
         Args:

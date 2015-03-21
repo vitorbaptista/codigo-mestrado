@@ -34,7 +34,7 @@ class TestRunner(unittest.TestCase):
             ('poll4', None),
         ])
 
-        res = Runner.main(csv_path)
+        res = Runner().main(csv_path)
         self.assertEqual(res, expected_result)
 
     def test_main_filtering_by_names(self):
@@ -46,7 +46,7 @@ class TestRunner(unittest.TestCase):
             ('poll4', None),
         ])
 
-        res = Runner.main(csv_path, name=['Joao', 'Pedro'])
+        res = Runner().main(csv_path, name=['Joao', 'Pedro'])
         self.assertEqual(res, expected_result)
 
     def test_main_filtering_by_parties(self):
@@ -58,7 +58,7 @@ class TestRunner(unittest.TestCase):
             ('poll4', None),
         ])
 
-        res = Runner.main(csv_path, party=['PT', 'PSOL'])
+        res = Runner().main(csv_path, party=['PT', 'PSOL'])
         self.assertEqual(res, expected_result)
 
     def test_main_filtering_by_state(self):
@@ -70,7 +70,7 @@ class TestRunner(unittest.TestCase):
             ('poll4', None),
         ])
 
-        res = Runner.main(csv_path, state=['PB', 'PE'])
+        res = Runner().main(csv_path, state=['PB', 'PE'])
         self.assertEqual(res, expected_result)
 
     def test_main_filtering_ignores_empty_filters(self):
@@ -82,7 +82,7 @@ class TestRunner(unittest.TestCase):
             ('poll4', None),
         ])
 
-        res = Runner.main(csv_path, name=[], party=[], state=[])
+        res = Runner().main(csv_path, name=[], party=[], state=[])
         self.assertEqual(res, expected_result)
 
     def test_main_filtering_by_multiple_criteria(self):
@@ -94,10 +94,10 @@ class TestRunner(unittest.TestCase):
             ('poll4', None),
         ])
 
-        res = Runner.main(csv_path,
-                          name=['Joao', 'Natalia'],
-                          party=['PT', 'PSOL'],
-                          state=['PB', 'RJ'])
+        res = Runner().main(csv_path,
+                            name=['Joao', 'Natalia'],
+                            party=['PT', 'PSOL'],
+                            state=['PB', 'RJ'])
         self.assertEqual(res, expected_result)
 
     def test_main_grouping_votes(self):
@@ -109,17 +109,17 @@ class TestRunner(unittest.TestCase):
             ('poll4', None),
         ])
 
-        res = Runner.main(csv_path, groupby='party')
+        res = Runner().main(csv_path, groupby='party')
         self.assertEqual(res, expected_result)
 
     def test_main_grouping_votes_ignores_invalid_groupby_column(self):
         csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
-        Runner.main(csv_path, groupby='invalid_groupby_column')
+        Runner().main(csv_path, groupby='invalid_groupby_column')
 
     def test_main_removes_metadata_columns_from_result(self):
         csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
         metadata_columns = ['name', 'party', 'state']
-        res = Runner.main(csv_path)
+        res = Runner().main(csv_path)
 
         for metadata_column in metadata_columns:
             with self.subTest(metadata_column=metadata_column):
@@ -137,7 +137,7 @@ class TestRunner(unittest.TestCase):
         ]
         mock_calculate = lambda votes: votes[0]
 
-        result = Runner.calculate_metric(votes, mock_calculate)
+        result = Runner().calculate_metric(votes, mock_calculate)
         self.assertEqual(result, expected_result)
 
     def test_calculate_metric_with_empty_polls(self):
@@ -145,7 +145,7 @@ class TestRunner(unittest.TestCase):
         expected_result = []
         mock_calculate = lambda votes: votes[0]
 
-        result = Runner.calculate_metric(votes, mock_calculate)
+        result = Runner().calculate_metric(votes, mock_calculate)
         self.assertEqual(result, expected_result)
 
     def test_calculate_metric_with_empty_votes(self):
@@ -153,7 +153,7 @@ class TestRunner(unittest.TestCase):
         expected_result = []
         mock_calculate = lambda votes: votes[0]
 
-        result = Runner.calculate_metric(votes, mock_calculate)
+        result = Runner().calculate_metric(votes, mock_calculate)
         self.assertEqual(result, expected_result)
 
     def __get_csv_path(self, filename):
