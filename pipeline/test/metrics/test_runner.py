@@ -100,6 +100,22 @@ class TestRunner(unittest.TestCase):
                           state=['PB', 'RJ'])
         self.assertEqual(res, expected_result)
 
+    def test_main_grouping_votes(self):
+        csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
+        expected_result = collections.OrderedDict([
+            ('poll1', 0.33333333333333337),
+            ('poll2', None),
+            ('poll3', None),
+            ('poll4', None),
+        ])
+
+        res = Runner.main(csv_path, groupby='party')
+        self.assertEqual(res, expected_result)
+
+    def test_main_grouping_votes_ignores_invalid_groupby_column(self):
+        csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
+        Runner.main(csv_path, groupby='invalid_groupby_column')
+
     def test_main_removes_metadata_columns_from_result(self):
         csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
         metadata_columns = ['name', 'party', 'state']

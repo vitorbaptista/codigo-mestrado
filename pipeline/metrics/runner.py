@@ -12,12 +12,15 @@ from pipeline.metrics.rice_index import RiceIndex
 
 
 class Runner(object):
+    METADATA_COLUMNS = ["name", "party", "state"]
+
     def __init__(self):
         self.parser = self.__create_parser()
 
     def run(self, args=sys.argv[1:], output=sys.stdout):
         options = self.parser.parse_args(args)
-        result = self.__class__.main(options.csv_path[0],
+        result = self.__class__.main(options.csv_path,
+                                     options.groupby,
                                      name=options.name,
                                      party=options.party,
                                      state=options.state)
@@ -27,7 +30,7 @@ class Runner(object):
         writer.writerow(result)
 
     @classmethod
-    def main(cls, csv_path, **filters):
+    def main(cls, csv_path, groupby=None, **filters):
         """Calculates the adjusted Rice Index polls contained in a CSV
 
         Args:
@@ -37,6 +40,11 @@ class Runner(object):
                     poll1,poll2,poll3
                     0,,1
                     1,1,1
+            groupby (string): Column on the metadata to group the votes by.
+                This is useful when you want to compare a larger party with a
+                smaller one. You would set groupby = "party", so this method
+                will get each party's most common vote to calculate the
+                cohesion. Defaults to None.
             filters (kwargs): dict of filters to limit which votes we consider
                 when calculating the metric. Defaults to None.
 
@@ -64,7 +72,16 @@ class Runner(object):
                     criteria = criterion
                 criteria = criteria & criterion
             if len(criteria):
+                metadata = metadata[criteria]
                 votes = votes[criteria]
+
+        if groupby and groupby in metadata:
+            def mode_removing_nulls(arr):
+                res = mode(arr[pd.notnull(arr)])[0]
+                if len(res):
+                    return res[0]
+            votes = votes.groupby(metadata[groupby])\
+                         .aggregate(mode_removing_nulls)
 
         metrics = cls.calculate_metric(votes, metric_method)
         return collections.OrderedDict(zip(votes.columns, metrics))
@@ -102,8 +119,12 @@ class Runner(object):
             description="Calculates adjusted rice index on a CSV with votes"
         )
         parser.add_argument(
-            "csv_path", nargs=1, type=str,
+            "csv_path", type=str,
             help="path for CSV with polls as columns and rows with votes"
+        )
+        parser.add_argument(
+            "--groupby", type=str, choices=self.METADATA_COLUMNS,
+            help="group votes by column (default: None)"
         )
         parser.add_argument(
             "--name", nargs="*", type=str, default=[],
@@ -118,3 +139,35 @@ class Runner(object):
             help="states to use when calculating cohesion (default: all)"
         )
         return parser
+
+
+# Copied from scipy.stats to avoid importing an entire library for a
+# single method
+# http://git.io/h1Pv
+def mode(a, axis=0):
+    a, axis = _chk_asarray(a, axis)
+    if a.size == 0:
+        return np.array([]), np.array([])
+
+    scores = np.unique(np.ravel(a))       # get ALL unique values
+    testshape = list(a.shape)
+    testshape[axis] = 1
+    oldmostfreq = np.zeros(testshape, dtype=a.dtype)
+    oldcounts = np.zeros(testshape, dtype=int)
+    for score in scores:
+        template = (a == score)
+        counts = np.expand_dims(np.sum(template, axis), axis)
+        mostfrequent = np.where(counts > oldcounts, score, oldmostfreq)
+        oldcounts = np.maximum(counts, oldcounts)
+        oldmostfreq = mostfrequent
+    return mostfrequent, oldcounts
+
+
+def _chk_asarray(a, axis):
+    if axis is None:
+        a = np.ravel(a)
+        outaxis = 0
+    else:
+        a = np.asarray(a)
+        outaxis = axis
+    return a, outaxis
