@@ -37,6 +37,8 @@ class Runner(object):
                     poll1,poll2,poll3
                     0,,1
                     1,1,1
+            filters (kwargs): dict of filters to limit which votes we consider
+                when calculating the metric. Defaults to none.
 
         Returns:
             OrderedDict: A dict with each poll name in the keys and the
