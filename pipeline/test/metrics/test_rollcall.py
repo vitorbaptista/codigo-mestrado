@@ -47,3 +47,27 @@ class TestRollcall(unittest.TestCase):
         result = rollcall.median_votes_groupped_by(groupby)
 
         self.assertEqual(result.to_dict(), expected_result)
+
+    def test_remove_unanimous_votes(self):
+        data = pd.core.frame.DataFrame([
+            {'poll1': 1, 'poll2': 1, 'poll3': None},
+            {'poll1': 1, 'poll2': 1, 'poll3': None},
+            {'poll1': 1, 'poll2': 0, 'poll3': None},
+            {'poll1': 0, 'poll2': 0, 'poll3': None},
+            {'poll1': None, 'poll2': 0, 'poll3': None},
+        ])
+
+        rollcall = Rollcall(data).remove_unanimous_votes(0.75)
+
+        # FIXME: Decide if we'll remove polls with no votes
+        self.assertEqual(rollcall.data.columns.tolist(), ['poll2'])
+
+    def test_remove_unanimous_votes_doesnt_remove_if_percentual_is_None(self):
+        data = pd.core.frame.DataFrame([
+            {'poll1': 1},
+            {'poll1': 1},
+        ])
+
+        rollcall = Rollcall(data).remove_unanimous_votes(None)
+
+        self.assertEqual(rollcall.data.columns.tolist(), ['poll1'])

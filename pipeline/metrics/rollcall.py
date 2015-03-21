@@ -33,6 +33,25 @@ class Rollcall(object):
             return self.__get_groups_median_votes(groupby)
         return self.data
 
+    def remove_unanimous_votes(self, majority_percentual):
+        """Remove votes with majority larget than `majority_percentual`
+
+        It ignores NULL votes.
+        """
+        def unanimous_columns(column):
+            counts = np.unique(column[pd.notnull(column)],
+                               return_counts=True)[1]
+            total = sum(counts)
+            for count in counts:
+                percentual = count/total
+                if percentual >= majority_percentual:
+                    return False
+            return len(counts) > 0
+        if majority_percentual is not None:
+            filters = self.data.apply(unanimous_columns)
+            self.data = self.data[filters.index[filters]]
+        return self
+
     def __apply_filters(self, filters):
         criteria = []
         for key, values in filters.items():

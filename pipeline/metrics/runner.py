@@ -20,6 +20,7 @@ class Runner(object):
     def run(self, args=sys.argv[1:], output=sys.stdout):
         options = self.parser.parse_args(args)
         result = self.main(options.csv_path,
+                           options.majority_percentual,
                            options.groupby,
                            name=options.name,
                            party=options.party,
@@ -29,7 +30,8 @@ class Runner(object):
         writer.writeheader()
         writer.writerow(result)
 
-    def main(self, csv_path, remove_unanimity=0, groupby=None, **filters):
+    def main(self, csv_path,
+             majority_percentual=None, groupby=None, **filters):
         """Calculates the adjusted Rice Index polls contained in a CSV
 
         Args:
@@ -39,6 +41,8 @@ class Runner(object):
                     poll1,poll2,poll3
                     0,,1
                     1,1,1
+            majority_percentual (float): Removes votes where the majority was
+                greater than this percentual. Defaults to None.
             groupby (string): Column on the metadata to group the votes by.
                 This is useful when you want to compare a larger party with a
                 smaller one. You would set groupby = "party", so this method
@@ -53,6 +57,7 @@ class Runner(object):
         """
         metric_method = RiceIndex().calculate_adjusted
         votes = Rollcall.from_csv(csv_path)\
+                        .remove_unanimous_votes(majority_percentual)\
                         .filter(filters)\
                         .median_votes_groupped_by(groupby)
 
@@ -94,6 +99,10 @@ class Runner(object):
         parser.add_argument(
             "csv_path", type=str,
             help="path for CSV with polls as columns and rows with votes"
+        )
+        parser.add_argument(
+            "--majority-percentual", type=float, default=None,
+            help="remove votes where the majority was >= than (default: None)"
         )
         parser.add_argument(
             "--groupby", type=str, choices=self.METADATA_COLUMNS,

@@ -7,6 +7,7 @@ import csv
 import collections
 
 from pipeline.metrics.runner import Runner
+from pipeline.metrics.runner import Rollcall
 
 
 class TestRunner(unittest.TestCase):
@@ -35,6 +36,16 @@ class TestRunner(unittest.TestCase):
         ])
 
         res = Runner().main(csv_path)
+        self.assertEqual(res, expected_result)
+
+    def test_remove_unanimous_votes_runs_before_filters(self):
+        csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
+        expected_result = collections.OrderedDict([
+            ('poll2', 0.33333333333333337),
+            ('poll3', None),
+        ])
+
+        res = Runner().main(csv_path, majority_percentual=0.9, party=['PT'])
         self.assertEqual(res, expected_result)
 
     def test_main_filtering_by_names(self):
@@ -118,7 +129,7 @@ class TestRunner(unittest.TestCase):
 
     def test_main_removes_metadata_columns_from_result(self):
         csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
-        metadata_columns = ['name', 'party', 'state']
+        metadata_columns = Rollcall.METADATA_COLUMNS
         res = Runner().main(csv_path)
 
         for metadata_column in metadata_columns:
