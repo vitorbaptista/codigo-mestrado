@@ -38,7 +38,7 @@ class Runner(object):
                     0,,1
                     1,1,1
             filters (kwargs): dict of filters to limit which votes we consider
-                when calculating the metric. Defaults to none.
+                when calculating the metric. Defaults to None.
 
         Returns:
             OrderedDict: A dict with each poll name in the keys and the
@@ -48,19 +48,23 @@ class Runner(object):
         metric_method = RiceIndex().calculate_adjusted
         metadata = []
         try:
-            metadata_columns = ['name', 'party', 'state']
-            metadata = votes[metadata_columns]
-            votes = votes.drop(metadata_columns, axis=1)
+            metadata = votes[cls.METADATA_COLUMNS]
+            votes = votes.drop(cls.METADATA_COLUMNS, axis=1)
         except (ValueError, KeyError):
             # Ignore if votes don't have the metadata_columns
             pass
 
-        if (len(metadata)):
+        if len(metadata):
+            criteria = []
             for key, values in filters.items():
-                if (not values):
+                if not values:
                     continue
                 criterion = metadata[key].map(lambda k: k in values)
-                votes = votes[criterion]
+                if len(criteria) == 0:
+                    criteria = criterion
+                criteria = criteria & criterion
+            if len(criteria):
+                votes = votes[criteria]
 
         metrics = cls.calculate_metric(votes, metric_method)
         return collections.OrderedDict(zip(votes.columns, metrics))

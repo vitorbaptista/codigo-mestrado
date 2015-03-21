@@ -52,13 +52,13 @@ class TestRunner(unittest.TestCase):
     def test_main_filtering_by_parties(self):
         csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
         expected_result = collections.OrderedDict([
-            ('poll1', 1),
-            ('poll2', None),
+            ('poll1', 0.4),
+            ('poll2', 0.0),
             ('poll3', None),
             ('poll4', None),
         ])
 
-        res = Runner.main(csv_path, party=['PV', 'PSOL'])
+        res = Runner.main(csv_path, party=['PT', 'PSOL'])
         self.assertEqual(res, expected_result)
 
     def test_main_filtering_by_state(self):
