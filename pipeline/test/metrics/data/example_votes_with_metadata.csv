@@ -1,7 +1,7 @@
 name,party,state,poll1,poll2,poll3,poll4
-Joao,PT,PB,1,1,1,
-Pedro,PT,PE,1,0,,
-Juliana,PT,PB,1,,,
-Joana,PV,SP,0,,,
-Natalia,PSOL,RJ,0,,,
-Carlos,PSOL,RJ,0,,,
+Joao,PT,PB,1,1,1,1
+Pedro,PT,PE,1,1,,
+Juliana,PT,PB,1,0,,
+Joana,PV,SP,1,0,0,
+Natalia,PSOL,RJ,1,0,,
+Carlos,PSOL,RJ,1,0,,
