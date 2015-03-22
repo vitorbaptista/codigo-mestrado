@@ -1,0 +1,52 @@
+#!/usr/bin/env Rscript
+suppressPackageStartupMessages(library(optparse))
+suppressPackageStartupMessages(library(BreakoutDetection))
+suppressPackageStartupMessages(library(xts))
+
+validate <- function(options) {
+  metadata_csv_path <- options[["metadata-csv-path"]]
+  if (is.null(metadata_csv_path)) {
+    stop("the metadata_csv_path argument is required")
+  }
+  metadata_columns <- scan(metadata_csv_path, quiet=TRUE,
+                           sep=",", what="character", nlines=1)
+  if (!all(c("id", "data") %in% metadata_columns)) {
+    stop("the metadata CSV needs to have at least an 'id' and 'data' columns")
+  }
+}
+
+option_list <- list(
+  make_option(c("-i", "--input"), default=file("stdin"),
+              help="Input CSV file path. The colum names must be the ID of the rollcall. Defaults to stdin."),
+  make_option(c("-p", "--plot-path"),
+              help="Path where to plot the data in PNG format."),
+  make_option(c("-m", "--metadata-csv-path"),
+              help="Votes' metadata CSV path. It needs to have at least an 'id' and 'data' columns")
+)
+options <- parse_args(OptionParser(option_list=option_list))
+validate(options)
+input <- options[["input"]]
+metadata_csv_path <- options[["metadata-csv-path"]]
+plot_path <- options[["plot-path"]]
+
+metadata <- read.csv(metadata_csv_path, header=TRUE, check.names=FALSE)
+metadata$data <- as.POSIXct(metadata$data)
+
+data <- read.csv(input, header=TRUE, check.names=FALSE)
+data <- as.data.frame(t(data))
+data$id <- as.numeric(rownames(data))
+
+# Merge data and metadata on the $id column
+merged_data <- merge(data, metadata)
+aux <- xts(merged_data["V1"], order.by=merged_data$data)
+result <- breakout(aux, method="multi")
+
+if (!is.null(plot_path)) {
+  png(plot_path, width=1920, height=1080)
+  plot(aux, type="l", ylim=c(0, 1), major.format="%b %Y")
+  for (loc in result$loc) {
+    breakout_data <- merged_data$data[loc]
+    print(breakout_data)
+    abline(v=breakout_data, lty=5, lwd=2, col="red")
+  }
+}

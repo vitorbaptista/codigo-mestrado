@@ -1,0 +1,20 @@
+#!/usr/bin/env Rscript
+suppressPackageStartupMessages(library(optparse))
+suppressPackageStartupMessages(library(zoo))
+
+option_list <- list(
+  make_option(c("-i", "--input"), default=file("stdin"),
+              help="Input CSV file path."),
+  make_option(c("-w", "--width"), type="integer", default=100,
+              help="Rolling window size (defaults to 100)")
+)
+options <- parse_args(OptionParser(option_list=option_list))
+input <- options[["input"]]
+width <- options[["width"]]
+
+data <- read.csv(input, header=TRUE, check.names=FALSE)
+result <- rollapply(simplify2array(data), width, function (x) { mean(x, na.rm=TRUE) })
+
+columns <- colnames(data)[width:ncol(data)]
+rel <- matrix(data=result, ncol=length(columns), dimnames=list(NULL, columns))
+write.csv(rel, stdout(), na="", row.names=FALSE)

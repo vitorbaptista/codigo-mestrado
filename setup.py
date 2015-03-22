@@ -9,7 +9,7 @@ setup(
     name='pipeline',
     version=__version__,
     packages=['pipeline', 'pipeline.metrics'],
-    scripts=['bin/rice_index'],
+    scripts=['bin/rice_index', 'bin/rollmean', 'bin/breakout_detection'],
     test_suite='pipeline.test',
 
     install_requires=[

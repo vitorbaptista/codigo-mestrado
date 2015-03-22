@@ -64,3 +64,9 @@ target/
 Session.vim
 .netrwhist
 *~
+
+### Images ###
+*.png
+
+### Data ###
+*.csv
