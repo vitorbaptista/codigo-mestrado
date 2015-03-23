@@ -13,6 +13,9 @@ input <- options[["input"]]
 width <- options[["width"]]
 
 data <- read.csv(input, header=TRUE, check.names=FALSE)
+if (ncol(data) < width) {
+  stop("can't calculate rolling mean with width larger than data length")
+}
 result <- rollapply(simplify2array(data), width, function (x) { mean(x, na.rm=TRUE) })
 
 columns <- colnames(data)[width:ncol(data)]
