@@ -19,7 +19,7 @@ class Runner(object):
 
     def run(self, args=sys.argv[1:], output=sys.stdout):
         options = self.parser.parse_args(args)
-        result = self.main(options.csv_path,
+        result = self.main(options.input,
                            options.majority_percentual,
                            options.groupby,
                            name=options.name,
@@ -97,7 +97,7 @@ class Runner(object):
             description="Calculates adjusted rice index on a CSV with votes"
         )
         parser.add_argument(
-            "csv_path", type=str,
+            "--input", type=str, default=sys.stdin,
             help="path for CSV with polls as columns and rows with votes"
         )
         parser.add_argument(
