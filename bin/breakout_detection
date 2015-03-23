@@ -20,6 +20,8 @@ option_list <- list(
               help="Input CSV file path. The colum names must be the ID of the rollcall. Defaults to stdin."),
   make_option(c("-p", "--plot-path"),
               help="Path where to plot the data in PNG format."),
+  make_option(c("-t", "--plot-title"),
+              help="Title for the plot."),
   make_option(c("-m", "--metadata-csv-path"),
               help="Votes' metadata CSV path. It needs to have at least an 'id' and 'data' columns")
 )
@@ -28,6 +30,7 @@ validate(options)
 input <- options[["input"]]
 metadata_csv_path <- options[["metadata-csv-path"]]
 plot_path <- options[["plot-path"]]
+plot_title <- options[["plot-title"]]
 
 metadata <- read.csv(metadata_csv_path, header=TRUE, check.names=FALSE)
 metadata$data <- as.POSIXct(metadata$data)
@@ -43,7 +46,7 @@ result <- breakout(aux, method="multi")
 
 if (!is.null(plot_path)) {
   png(plot_path, width=1920, height=1080)
-  plot(aux, type="l", ylim=c(0, 1), major.format="%b %Y")
+  plot(aux, main=plot_title, type="l", ylim=c(0, 1), major.format="%b %Y")
   for (loc in result$loc) {
     breakout_data <- merged_data$data[loc]
     print(breakout_data)
