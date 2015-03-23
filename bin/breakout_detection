@@ -2,6 +2,9 @@
 suppressPackageStartupMessages(library(optparse))
 suppressPackageStartupMessages(library(BreakoutDetection))
 suppressPackageStartupMessages(library(xts))
+suppressPackageStartupMessages(library(zoo))
+
+Sys.setenv(TZ='America/Sao_Paulo')
 
 validate <- function(options) {
   metadata_csv_path <- options[["metadata-csv-path"]]
@@ -17,10 +20,10 @@ validate <- function(options) {
 
 plot_breakout <- function(data, theBreakout, plot_path, plot_title) {
   png(plot_path, width=1920, height=1080)
+  aux <- xts(data$count, order.by=data$timestamp)
   plot(aux, main=plot_title, type="l", ylim=c(0, 1), major.format="%b %Y")
   for (loc in result$loc) {
     breakout_data <- merged_data$data[loc]
-    print(breakout_data)
     abline(v=breakout_data, lty=5, lwd=2, col="red")
   }
 }
@@ -48,12 +51,37 @@ metadata$data <- as.POSIXct(metadata$data)
 data <- read.csv(input, header=TRUE, check.names=FALSE)
 data <- as.data.frame(t(data))
 data$id <- as.numeric(rownames(data))
+data$count <- data[["V1"]]
+data["V1"] <- NULL
 
 # Merge data and metadata on the $id column
 merged_data <- merge(data, metadata)
-aux <- xts(merged_data["V1"], order.by=merged_data$data)
-result <- breakout(aux, method="multi")
+merged_data$timestamp <- merged_data[['data']]
+merged_data <- merged_data[order(merged_data$timestamp),]
+result <- breakout(merged_data, method="multi")
 
 if (!is.null(plot_path)) {
   plot_breakout(merged_data, theBreakout, plot_path, plot_title)
 }
+
+calculate_breakout_medians <- function(data, theBreakout) {
+  if (length(theBreakout$loc) == 0) {
+    return(NULL)
+  }
+
+  data <- data[order(data$data),,drop=FALSE]
+  locs <- c(1, theBreakout$loc, nrow(data))
+  rollapply(locs, 2, function (x) {
+    period <- data[x[1]:x[2],,drop=FALSE]
+    data.frame(
+      start_id = period[1, 'id'],
+      end_id = period[nrow(period), 'id'],
+      start = period[1, 'data'],
+      end = period[nrow(period), 'data'],
+      mean = mean(period$count, na.rm = TRUE),
+      length = nrow(period)
+    )
+  })
+}
+
+write.csv(calculate_breakout_medians(merged_data, result), stdout(), na="", row.names=FALSE, quote=FALSE)
