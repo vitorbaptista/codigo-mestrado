@@ -18,14 +18,14 @@ validate <- function(options) {
   }
 }
 
-calculate_breakout_medians <- function(data, theBreakout) {
-  if (length(theBreakout$loc) == 0) {
+calculate_breakout_medians <- function(data, the_breakout) {
+  if (length(the_breakout$loc) == 0) {
     return(NULL)
   }
 
   data <- data[order(data$data),,drop=FALSE]
-  locs <- c(1, theBreakout$loc, nrow(data))
-  rollapply(locs, 2, function (x) {
+  locs <- c(1, the_breakout$loc, nrow(data))
+  res <- rollapply(locs, 2, function (x) {
     period <- data[x[1]:x[2],,drop=FALSE]
     data.frame(
       start_id = period[1, 'id'],
@@ -44,6 +44,9 @@ plot_breakout <- function(data, breakout_data, plot_path, plot_title) {
   png(plot_path, width=1920, height=1080)
   aux <- xts(data$count, order.by=data$timestamp)
   plot(aux, main=plot_title, type="l", ylim=c(0, 1), major.format="%b %Y", auto.grid=FALSE)
+  if (is.null(breakout_data)) {
+    return(NULL)
+  }
   for (i in 1:nrow(breakout_data)) {
     the_breakout <- breakout_data[i, , drop=FALSE]
     if (i > 1) {
@@ -96,7 +99,9 @@ result <- breakout(merged_data, method="multi")
 
 breakout_data <- calculate_breakout_medians(merged_data, result)
 if (!is.null(plot_path)) {
-  plot_breakout(merged_data, breakout_data, plot_path, plot_title)
+  invisible(plot_breakout(merged_data, breakout_data, plot_path, plot_title))
 }
 
-write.csv(breakout_data, stdout(), na="", row.names=FALSE, quote=FALSE)
+if (!is.null(breakout_data)) {
+  write.csv(breakout_data, stdout(), na="", row.names=FALSE, quote=FALSE)
+}
