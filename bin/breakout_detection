@@ -15,6 +15,16 @@ validate <- function(options) {
   }
 }
 
+plot_breakout <- function(data, theBreakout, plot_path, plot_title) {
+  png(plot_path, width=1920, height=1080)
+  plot(aux, main=plot_title, type="l", ylim=c(0, 1), major.format="%b %Y")
+  for (loc in result$loc) {
+    breakout_data <- merged_data$data[loc]
+    print(breakout_data)
+    abline(v=breakout_data, lty=5, lwd=2, col="red")
+  }
+}
+
 option_list <- list(
   make_option(c("-i", "--input"), default=file("stdin"),
               help="Input CSV file path. The colum names must be the ID of the rollcall. Defaults to stdin."),
@@ -45,11 +55,5 @@ aux <- xts(merged_data["V1"], order.by=merged_data$data)
 result <- breakout(aux, method="multi")
 
 if (!is.null(plot_path)) {
-  png(plot_path, width=1920, height=1080)
-  plot(aux, main=plot_title, type="l", ylim=c(0, 1), major.format="%b %Y")
-  for (loc in result$loc) {
-    breakout_data <- merged_data$data[loc]
-    print(breakout_data)
-    abline(v=breakout_data, lty=5, lwd=2, col="red")
-  }
+  plot_breakout(merged_data, theBreakout, plot_path, plot_title)
 }
