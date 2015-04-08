@@ -73,9 +73,11 @@ class Runner(object):
         if groupby:
             votes.insert(0, groupby, votes.index)
 
+        rows = []
+        columns = votes.columns.tolist()
         replace_nan_with_none = lambda df: df.where(pd.notnull(df), None)
-        rows = [collections.OrderedDict(replace_nan_with_none(row))
-                for i, row in votes.iterrows()]
+        for row in replace_nan_with_none(votes).itertuples(False):
+            rows.append(collections.OrderedDict(zip(columns, row)))
         return rows
 
     def calculate_metric(self, votes, metric_method):

@@ -5,6 +5,7 @@ import os
 import io
 import csv
 import collections
+import numpy as np
 
 from pipeline.metrics.runner import Runner
 from pipeline.metrics.runner import Rollcall
@@ -80,6 +81,13 @@ class TestRunner(unittest.TestCase):
         res = Runner().main(csv_path, metric_method=None,
                             groupby='party')
         self.assertEqual(res, expected_result)
+
+    def test_main_groups_doesnt_convert_int_groups_to_float(self):
+        csv_path = self._get_csv_path('example_votes_with_metadata.csv')
+
+        res = Runner().main(csv_path, metric_method=None,
+                            groupby='id', name='Joao')
+        self.assertEqual(type(res[0]['id']), np.int64)
 
     def test_remove_unanimous_votes_runs_before_filters(self):
         csv_path = self._get_csv_path('example_votes_with_metadata.csv')
