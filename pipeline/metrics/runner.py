@@ -6,6 +6,7 @@ import sys
 import collections
 
 import numpy as np
+import pandas as pd
 
 from pipeline.metrics.rice_index import RiceIndex
 from pipeline.metrics.rollcall import Rollcall
@@ -24,12 +25,13 @@ class Runner(object):
                            party=options.party,
                            state=options.state)
 
-        writer = csv.DictWriter(output, fieldnames=result.keys())
+        writer = csv.DictWriter(output, fieldnames=result[0].keys())
         writer.writeheader()
-        writer.writerow(result)
+        writer.writerows(result)
 
     def main(self, csv_path,
-             majority_percentual=None, groupby=None, **filters):
+             majority_percentual=None, groupby=None,
+             metric_method=RiceIndex().calculate_adjusted, **filters):
         """Calculates the adjusted Rice Index polls contained in a CSV
 
         Args:
@@ -46,22 +48,31 @@ class Runner(object):
                 smaller one. You would set groupby = "party", so this method
                 will get each party's most common vote to calculate the
                 cohesion. Defaults to None.
+            metric_method (function): Method that receives a list of votes and
+                returns a score. For an example, check RiceIndex().calculate.
+                Defaults to RiceIndex().calculate_adjusted.
             filters (kwargs): dict of filters to limit which votes we consider
                 when calculating the metric. Defaults to None.
 
         Returns:
-            OrderedDict: A dict with each poll name in the keys and the
-                resulting adjusted Rice Index in the values.
+            list(OrderedDict): A list of dicts with each poll name in the keys
+                and the resulting metric score in the values. If there's no
+                `metric_method`, it'll simply remove unanimous votes, apply
+                groups and filters.
         """
-        metric_method = RiceIndex().calculate_adjusted
         votes = Rollcall.from_csv(csv_path)\
                         .remove_unanimous_votes(majority_percentual)\
                         .filter(filters)\
                         .median_votes_groupped_by(groupby)
 
-        metrics = self.calculate_metric(votes, metric_method)
+        if metric_method:
+            metrics = self.calculate_metric(votes, metric_method)
+            return [collections.OrderedDict(zip(votes.columns, metrics))]
 
-        return collections.OrderedDict(zip(votes.columns, metrics))
+        replace_nan_with_none = lambda df: df.where(pd.notnull(df), None)
+        rows = [collections.OrderedDict(replace_nan_with_none(row))
+                for i, row in votes.iterrows()]
+        return rows
 
     def calculate_metric(self, votes, metric_method):
         """Takes list of poll votes and returns result of metric on each poll.

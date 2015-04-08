@@ -28,82 +28,102 @@ class TestRunner(unittest.TestCase):
 
     def test_main(self):
         csv_path = self.__get_csv_path('example_votes.csv')
-        expected_result = collections.OrderedDict([
+        expected_result = [collections.OrderedDict([
             ('poll1', 1.0),
             ('poll2', 0.4),
             ('poll3', 0.0),
             ('poll4', None),
-        ])
+        ])]
 
         res = Runner().main(csv_path)
         self.assertEqual(res, expected_result)
 
+    def test_main_doesnt_calculate_metric_if_called_without_method(self):
+        csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
+        expected_result = [
+            collections.OrderedDict([('poll1', 1.0), ('poll2', 1.0),
+                                     ('poll3', 1.0), ('poll4', 1.0)]),
+            collections.OrderedDict([('poll1', 1.0), ('poll2', 1.0),
+                                     ('poll3', None), ('poll4', None)]),
+            collections.OrderedDict([('poll1', 1.0), ('poll2', 0.0),
+                                     ('poll3', None), ('poll4', None)]),
+            collections.OrderedDict([('poll1', 1.0), ('poll2', 0.0),
+                                     ('poll3', 0.0), ('poll4', None)]),
+            collections.OrderedDict([('poll1', 1.0), ('poll2', 0.0),
+                                     ('poll3', None), ('poll4', None)]),
+            collections.OrderedDict([('poll1', 1.0), ('poll2', 0.0),
+                                     ('poll3', None), ('poll4', None)]),
+        ]
+
+        res = Runner().main(csv_path, metric_method=None)
+        self.assertEqual(res, expected_result)
+
     def test_remove_unanimous_votes_runs_before_filters(self):
         csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
-        expected_result = collections.OrderedDict([
+        expected_result = [collections.OrderedDict([
             ('poll2', 0.33333333333333337),
             ('poll3', None),
-        ])
+        ])]
 
         res = Runner().main(csv_path, majority_percentual=0.9, party=['PT'])
         self.assertEqual(res, expected_result)
 
     def test_main_filtering_by_names(self):
         csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
-        expected_result = collections.OrderedDict([
+        expected_result = [collections.OrderedDict([
             ('poll1', 1.0),
             ('poll2', 1.0),
             ('poll3', None),
             ('poll4', None),
-        ])
+        ])]
 
         res = Runner().main(csv_path, name=['Joao', 'Pedro'])
         self.assertEqual(res, expected_result)
 
     def test_main_filtering_by_parties(self):
         csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
-        expected_result = collections.OrderedDict([
+        expected_result = [collections.OrderedDict([
             ('poll1', 1.0),
             ('poll2', 0.4),
             ('poll3', None),
             ('poll4', None),
-        ])
+        ])]
 
         res = Runner().main(csv_path, party=['PT', 'PSOL'])
         self.assertEqual(res, expected_result)
 
     def test_main_filtering_by_state(self):
         csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
-        expected_result = collections.OrderedDict([
+        expected_result = [collections.OrderedDict([
             ('poll1', 1.0),
             ('poll2', 0.33333333333333337),
             ('poll3', None),
             ('poll4', None),
-        ])
+        ])]
 
         res = Runner().main(csv_path, state=['PB', 'PE'])
         self.assertEqual(res, expected_result)
 
     def test_main_filtering_ignores_empty_filters(self):
         csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
-        expected_result = collections.OrderedDict([
+        expected_result = [collections.OrderedDict([
             ('poll1', 1.0),
             ('poll2', 0.4666666666666667),
             ('poll3', 0.0),
             ('poll4', None),
-        ])
+        ])]
 
         res = Runner().main(csv_path, name=[], party=[], state=[])
         self.assertEqual(res, expected_result)
 
     def test_main_filtering_by_multiple_criteria(self):
         csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
-        expected_result = collections.OrderedDict([
+        expected_result = [collections.OrderedDict([
             ('poll1', 1.0),
             ('poll2', 0.0),
             ('poll3', None),
             ('poll4', None),
-        ])
+        ])]
 
         res = Runner().main(csv_path,
                             name=['Joao', 'Natalia'],
@@ -113,12 +133,12 @@ class TestRunner(unittest.TestCase):
 
     def test_main_grouping_votes(self):
         csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
-        expected_result = collections.OrderedDict([
+        expected_result = [collections.OrderedDict([
             ('poll1', 1.0),
             ('poll2', 0.33333333333333337),
             ('poll3', 0.0),
             ('poll4', None),
-        ])
+        ])]
 
         res = Runner().main(csv_path, groupby='party')
         self.assertEqual(res, expected_result)
