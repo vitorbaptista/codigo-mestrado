@@ -13,7 +13,7 @@ from pipeline.metrics.runner import Rollcall
 class TestRunner(unittest.TestCase):
     def test_run_writes_result_in_output(self):
         csv_path = self.__get_csv_path('example_votes.csv')
-        args = [csv_path]
+        args = ['--input', csv_path]
         output = io.StringIO()
         expected_result = [
             ['poll1', 'poll2', 'poll3', 'poll4'],
