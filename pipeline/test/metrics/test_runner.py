@@ -18,12 +18,12 @@ class TestRunner(unittest.TestCase):
         output = io.StringIO()
         expected_result = [
             ['poll1', 'poll2', 'poll3', 'poll4'],
-            ['1.0', '1.0', '1.0', '1.0'],
-            ['1.0', '1.0', '', ''],
-            ['1.0', '1.0', '', ''],
-            ['1.0', '0.0', '0.0', ''],
-            ['1.0', '0.0', '', ''],
-            ['1.0', '0.0', '', '']
+            ['1', '1', '1', '1'],
+            ['1', '1', '', ''],
+            ['1', '1', '', ''],
+            ['1', '0', '0', ''],
+            ['1', '0', '', ''],
+            ['1', '0', '', '']
         ]
 
         Runner().run(args, output)
@@ -35,9 +35,9 @@ class TestRunner(unittest.TestCase):
     def test_main(self):
         csv_path = self._get_csv_path('example_votes.csv')
         expected_result = [collections.OrderedDict([
-            ('poll1', 1.0),
+            ('poll1', 1),
             ('poll2', 0.4),
-            ('poll3', 0.0),
+            ('poll3', 0),
             ('poll4', None),
         ])]
 
@@ -47,17 +47,17 @@ class TestRunner(unittest.TestCase):
     def test_main_doesnt_calculate_metric_if_called_without_method(self):
         csv_path = self._get_csv_path('example_votes_with_metadata.csv')
         expected_result = [
-            collections.OrderedDict([('poll1', 1.0), ('poll2', 1.0),
-                                     ('poll3', 1.0), ('poll4', 1.0)]),
-            collections.OrderedDict([('poll1', 1.0), ('poll2', 1.0),
+            collections.OrderedDict([('poll1', 1), ('poll2', 1),
+                                     ('poll3', 1), ('poll4', 1)]),
+            collections.OrderedDict([('poll1', 1), ('poll2', 1),
                                      ('poll3', None), ('poll4', None)]),
-            collections.OrderedDict([('poll1', 1.0), ('poll2', 0.0),
+            collections.OrderedDict([('poll1', 1), ('poll2', 0),
                                      ('poll3', None), ('poll4', None)]),
-            collections.OrderedDict([('poll1', 1.0), ('poll2', 0.0),
-                                     ('poll3', 0.0), ('poll4', None)]),
-            collections.OrderedDict([('poll1', 1.0), ('poll2', 0.0),
+            collections.OrderedDict([('poll1', 1), ('poll2', 0),
+                                     ('poll3', 0), ('poll4', None)]),
+            collections.OrderedDict([('poll1', 1), ('poll2', 0),
                                      ('poll3', None), ('poll4', None)]),
-            collections.OrderedDict([('poll1', 1.0), ('poll2', 0.0),
+            collections.OrderedDict([('poll1', 1), ('poll2', 0),
                                      ('poll3', None), ('poll4', None)]),
         ]
 
@@ -102,8 +102,8 @@ class TestRunner(unittest.TestCase):
     def test_main_filtering_by_names(self):
         csv_path = self._get_csv_path('example_votes_with_metadata.csv')
         expected_result = [collections.OrderedDict([
-            ('poll1', 1.0),
-            ('poll2', 1.0),
+            ('poll1', 1),
+            ('poll2', 1),
             ('poll3', None),
             ('poll4', None),
         ])]
@@ -114,7 +114,7 @@ class TestRunner(unittest.TestCase):
     def test_main_filtering_by_parties(self):
         csv_path = self._get_csv_path('example_votes_with_metadata.csv')
         expected_result = [collections.OrderedDict([
-            ('poll1', 1.0),
+            ('poll1', 1),
             ('poll2', 0.4),
             ('poll3', None),
             ('poll4', None),
@@ -126,7 +126,7 @@ class TestRunner(unittest.TestCase):
     def test_main_filtering_by_state(self):
         csv_path = self._get_csv_path('example_votes_with_metadata.csv')
         expected_result = [collections.OrderedDict([
-            ('poll1', 1.0),
+            ('poll1', 1),
             ('poll2', 0.33333333333333337),
             ('poll3', None),
             ('poll4', None),
@@ -138,9 +138,9 @@ class TestRunner(unittest.TestCase):
     def test_main_filtering_ignores_empty_filters(self):
         csv_path = self._get_csv_path('example_votes_with_metadata.csv')
         expected_result = [collections.OrderedDict([
-            ('poll1', 1.0),
+            ('poll1', 1),
             ('poll2', 0.4666666666666667),
-            ('poll3', 0.0),
+            ('poll3', 0),
             ('poll4', None),
         ])]
 
@@ -150,8 +150,8 @@ class TestRunner(unittest.TestCase):
     def test_main_filtering_by_multiple_criteria(self):
         csv_path = self._get_csv_path('example_votes_with_metadata.csv')
         expected_result = [collections.OrderedDict([
-            ('poll1', 1.0),
-            ('poll2', 0.0),
+            ('poll1', 1),
+            ('poll2', 0),
             ('poll3', None),
             ('poll4', None),
         ])]
@@ -165,9 +165,9 @@ class TestRunner(unittest.TestCase):
     def test_main_grouping_votes(self):
         csv_path = self._get_csv_path('example_votes_with_metadata.csv')
         expected_result = [collections.OrderedDict([
-            ('poll1', 1.0),
+            ('poll1', 1),
             ('poll2', 0.33333333333333337),
-            ('poll3', 0.0),
+            ('poll3', 0),
             ('poll4', None),
         ])]
 

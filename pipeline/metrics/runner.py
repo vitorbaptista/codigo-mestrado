@@ -77,6 +77,7 @@ class Runner(object):
         columns = votes.columns.tolist()
         replace_nan_with_none = lambda df: df.where(pd.notnull(df), None)
         for row in replace_nan_with_none(votes).itertuples(False):
+            row = [self._convert_to_int_if_possible(r) for r in row]
             rows.append(collections.OrderedDict(zip(columns, row)))
         return rows
 
@@ -112,6 +113,14 @@ class Runner(object):
             return RiceIndex().calculate
         elif method_name == "adjusted_rice_index":
             return RiceIndex().calculate_adjusted
+
+    def _convert_to_int_if_possible(self, value):
+        try:
+            if value.is_integer():
+                return int(value)
+            return value
+        except AttributeError:
+            return value
 
     def _create_parser(self):
         parser = argparse.ArgumentParser(
