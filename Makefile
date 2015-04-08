@@ -3,3 +3,9 @@ all:
 		| ./bin/rollmean\
 		| ./bin/breakout_detection --metadata-csv-path oc-54-votacoes.csv --plot-path output.png --plot-title "${PARTIES}"
 	gnome-open output.png
+
+names:
+	./bin/rice_index --input oc-54.csv --majority-percentual 0.975 --name ${NAMES} --groupby name\
+		| ./bin/rollmean\
+		| ./bin/breakout_detection --metadata-csv-path oc-54-votacoes.csv --plot-path output.png --plot-title "${NAMES}"
+	gnome-open output.png
