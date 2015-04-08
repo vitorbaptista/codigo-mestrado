@@ -8,15 +8,10 @@ class Rollcall(object):
     METADATA_COLUMNS = ["id", "name", "party", "state"]
 
     def __init__(self, data):
-        metadata = []
-        try:
-            metadata = data[self.METADATA_COLUMNS]
-            data = data.drop(self.METADATA_COLUMNS, axis=1)
-        except (ValueError, KeyError):
-            # Ignore if votes don't have the metadata_columns
-            pass
-        self.data = data
-        self.metadata = metadata
+        intersect = lambda x, y: list(set(x) & set(y))
+        metadata_cols = intersect(self.METADATA_COLUMNS, data.keys().tolist())
+        self.metadata = data[metadata_cols]
+        self.data = data.drop(metadata_cols, axis=1)
 
     @classmethod
     def from_csv(cls, csv_path):
