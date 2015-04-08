@@ -17,7 +17,12 @@ class TestRunner(unittest.TestCase):
         output = io.StringIO()
         expected_result = [
             ['poll1', 'poll2', 'poll3', 'poll4'],
-            ['1.0', '0.4', '0.0', ''],
+            ['1.0', '1.0', '1.0', '1.0'],
+            ['1.0', '1.0', '', ''],
+            ['1.0', '1.0', '', ''],
+            ['1.0', '0.0', '0.0', ''],
+            ['1.0', '0.0', '', ''],
+            ['1.0', '0.0', '', '']
         ]
 
         Runner().run(args, output)

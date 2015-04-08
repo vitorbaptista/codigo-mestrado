@@ -21,6 +21,7 @@ class Runner(object):
         result = self.main(options.input,
                            options.majority_percentual,
                            options.groupby,
+                           self._get_metric_method(options.metric),
                            name=options.name,
                            party=options.party,
                            state=options.state)
@@ -104,6 +105,12 @@ class Runner(object):
 
         return result
 
+    def _get_metric_method(self, method_name):
+        if method_name == "rice_index":
+            return RiceIndex().calculate
+        elif method_name == "adjusted_rice_index":
+            return RiceIndex().calculate_adjusted
+
     def __create_parser(self):
         parser = argparse.ArgumentParser(
             description="Calculates adjusted rice index on a CSV with votes"
@@ -111,6 +118,11 @@ class Runner(object):
         parser.add_argument(
             "--input", type=str, default=sys.stdin,
             help="path for CSV with polls as columns and rows with votes"
+        )
+        parser.add_argument(
+            "--metric", type=str,
+            choices=["rice_index", "adjusted_rice_index"],
+            help="defines the metric algorithm to calculate (default: None)"
         )
         parser.add_argument(
             "--majority-percentual", type=float, default=None,
