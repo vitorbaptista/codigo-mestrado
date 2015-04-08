@@ -14,7 +14,7 @@ from pipeline.metrics.rollcall import Rollcall
 
 class Runner(object):
     def __init__(self):
-        self.parser = self.__create_parser()
+        self.parser = self._create_parser()
 
     def run(self, args=sys.argv[1:], output=sys.stdout):
         options = self.parser.parse_args(args)
@@ -111,7 +111,7 @@ class Runner(object):
         elif method_name == "adjusted_rice_index":
             return RiceIndex().calculate_adjusted
 
-    def __create_parser(self):
+    def _create_parser(self):
         parser = argparse.ArgumentParser(
             description="Calculates adjusted rice index on a CSV with votes"
         )

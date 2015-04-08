@@ -12,7 +12,7 @@ from pipeline.metrics.runner import Rollcall
 
 class TestRunner(unittest.TestCase):
     def test_run_writes_result_in_output(self):
-        csv_path = self.__get_csv_path('example_votes.csv')
+        csv_path = self._get_csv_path('example_votes.csv')
         args = ['--input', csv_path]
         output = io.StringIO()
         expected_result = [
@@ -32,7 +32,7 @@ class TestRunner(unittest.TestCase):
         self.assertEqual(result, expected_result)
 
     def test_main(self):
-        csv_path = self.__get_csv_path('example_votes.csv')
+        csv_path = self._get_csv_path('example_votes.csv')
         expected_result = [collections.OrderedDict([
             ('poll1', 1.0),
             ('poll2', 0.4),
@@ -44,7 +44,7 @@ class TestRunner(unittest.TestCase):
         self.assertEqual(res, expected_result)
 
     def test_main_doesnt_calculate_metric_if_called_without_method(self):
-        csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
+        csv_path = self._get_csv_path('example_votes_with_metadata.csv')
         expected_result = [
             collections.OrderedDict([('poll1', 1.0), ('poll2', 1.0),
                                      ('poll3', 1.0), ('poll4', 1.0)]),
@@ -64,7 +64,7 @@ class TestRunner(unittest.TestCase):
         self.assertEqual(res, expected_result)
 
     def test_main_groups_correctly_when_not_calculating_metric(self):
-        csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
+        csv_path = self._get_csv_path('example_votes_with_metadata.csv')
         expected_result = [
             collections.OrderedDict([('party', 'PSOL'),
                                      ('poll1', 1), ('poll2', 0),
@@ -82,7 +82,7 @@ class TestRunner(unittest.TestCase):
         self.assertEqual(res, expected_result)
 
     def test_remove_unanimous_votes_runs_before_filters(self):
-        csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
+        csv_path = self._get_csv_path('example_votes_with_metadata.csv')
         expected_result = [collections.OrderedDict([
             ('poll2', 0.33333333333333337),
             ('poll3', None),
@@ -92,7 +92,7 @@ class TestRunner(unittest.TestCase):
         self.assertEqual(res, expected_result)
 
     def test_main_filtering_by_names(self):
-        csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
+        csv_path = self._get_csv_path('example_votes_with_metadata.csv')
         expected_result = [collections.OrderedDict([
             ('poll1', 1.0),
             ('poll2', 1.0),
@@ -104,7 +104,7 @@ class TestRunner(unittest.TestCase):
         self.assertEqual(res, expected_result)
 
     def test_main_filtering_by_parties(self):
-        csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
+        csv_path = self._get_csv_path('example_votes_with_metadata.csv')
         expected_result = [collections.OrderedDict([
             ('poll1', 1.0),
             ('poll2', 0.4),
@@ -116,7 +116,7 @@ class TestRunner(unittest.TestCase):
         self.assertEqual(res, expected_result)
 
     def test_main_filtering_by_state(self):
-        csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
+        csv_path = self._get_csv_path('example_votes_with_metadata.csv')
         expected_result = [collections.OrderedDict([
             ('poll1', 1.0),
             ('poll2', 0.33333333333333337),
@@ -128,7 +128,7 @@ class TestRunner(unittest.TestCase):
         self.assertEqual(res, expected_result)
 
     def test_main_filtering_ignores_empty_filters(self):
-        csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
+        csv_path = self._get_csv_path('example_votes_with_metadata.csv')
         expected_result = [collections.OrderedDict([
             ('poll1', 1.0),
             ('poll2', 0.4666666666666667),
@@ -140,7 +140,7 @@ class TestRunner(unittest.TestCase):
         self.assertEqual(res, expected_result)
 
     def test_main_filtering_by_multiple_criteria(self):
-        csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
+        csv_path = self._get_csv_path('example_votes_with_metadata.csv')
         expected_result = [collections.OrderedDict([
             ('poll1', 1.0),
             ('poll2', 0.0),
@@ -155,7 +155,7 @@ class TestRunner(unittest.TestCase):
         self.assertEqual(res, expected_result)
 
     def test_main_grouping_votes(self):
-        csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
+        csv_path = self._get_csv_path('example_votes_with_metadata.csv')
         expected_result = [collections.OrderedDict([
             ('poll1', 1.0),
             ('poll2', 0.33333333333333337),
@@ -167,11 +167,11 @@ class TestRunner(unittest.TestCase):
         self.assertEqual(res, expected_result)
 
     def test_main_grouping_votes_ignores_invalid_groupby_column(self):
-        csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
+        csv_path = self._get_csv_path('example_votes_with_metadata.csv')
         Runner().main(csv_path, groupby='invalid_groupby_column')
 
     def test_main_removes_metadata_columns_from_result(self):
-        csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
+        csv_path = self._get_csv_path('example_votes_with_metadata.csv')
         metadata_columns = Rollcall.METADATA_COLUMNS
         res = Runner().main(csv_path)
 
@@ -210,7 +210,7 @@ class TestRunner(unittest.TestCase):
         result = Runner().calculate_metric(votes, mock_calculate)
         self.assertEqual(result, expected_result)
 
-    def __get_csv_path(self, filename):
+    def _get_csv_path(self, filename):
         base_path = os.path.dirname(os.path.realpath(__file__))
         data_path = os.path.join(base_path, 'data')
         return os.path.join(data_path, filename)
