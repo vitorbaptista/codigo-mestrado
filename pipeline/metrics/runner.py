@@ -12,8 +12,6 @@ from pipeline.metrics.rollcall import Rollcall
 
 
 class Runner(object):
-    METADATA_COLUMNS = ["name", "party", "state"]
-
     def __init__(self):
         self.parser = self.__create_parser()
 
@@ -105,7 +103,7 @@ class Runner(object):
             help="remove votes where the majority was >= than (default: None)"
         )
         parser.add_argument(
-            "--groupby", type=str, choices=self.METADATA_COLUMNS,
+            "--groupby", type=str, choices=Rollcall.METADATA_COLUMNS,
             help="group votes by column (default: None)"
         )
         parser.add_argument(

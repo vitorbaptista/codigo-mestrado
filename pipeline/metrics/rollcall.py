@@ -5,7 +5,7 @@ import pandas as pd
 
 
 class Rollcall(object):
-    METADATA_COLUMNS = ["name", "party", "state"]
+    METADATA_COLUMNS = ["id", "name", "party", "state"]
 
     def __init__(self, data):
         metadata = []
