@@ -69,6 +69,9 @@ class Runner(object):
             metrics = self.calculate_metric(votes, metric_method)
             return [collections.OrderedDict(zip(votes.columns, metrics))]
 
+        if groupby:
+            votes.insert(0, groupby, votes.index)
+
         replace_nan_with_none = lambda df: df.where(pd.notnull(df), None)
         rows = [collections.OrderedDict(replace_nan_with_none(row))
                 for i, row in votes.iterrows()]

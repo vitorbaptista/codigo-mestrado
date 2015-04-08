@@ -58,6 +58,24 @@ class TestRunner(unittest.TestCase):
         res = Runner().main(csv_path, metric_method=None)
         self.assertEqual(res, expected_result)
 
+    def test_main_groups_correctly_when_not_calculating_metric(self):
+        csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
+        expected_result = [
+            collections.OrderedDict([('party', 'PSOL'),
+                                     ('poll1', 1), ('poll2', 0),
+                                     ('poll3', None), ('poll4', None)]),
+            collections.OrderedDict([('party', 'PT'),
+                                     ('poll1', 1), ('poll2', 1),
+                                     ('poll3', 1), ('poll4', 1)]),
+            collections.OrderedDict([('party', 'PV'),
+                                     ('poll1', 1), ('poll2', 0),
+                                     ('poll3', 0), ('poll4', None)]),
+        ]
+
+        res = Runner().main(csv_path, metric_method=None,
+                            groupby='party')
+        self.assertEqual(res, expected_result)
+
     def test_remove_unanimous_votes_runs_before_filters(self):
         csv_path = self.__get_csv_path('example_votes_with_metadata.csv')
         expected_result = [collections.OrderedDict([
