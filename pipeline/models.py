@@ -45,6 +45,7 @@ class Proposicao(Base):
 
     @classmethod
     def build(cls, proposicao_dict):
+        proposicao_dict = _strip_all_values(proposicao_dict)
         return cls(
             id=_parse_int(proposicao_dict['id']),
             nome=proposicao_dict['nome'],
@@ -105,6 +106,7 @@ class Votacao(Base):
 
     @classmethod
     def build(cls, proposicao, sessao_dict):
+        sessao_dict = _strip_all_values(sessao_dict)
         datahora = '%s %s' % ((sessao_dict['data'], sessao_dict['hora']))
         votacao = cls(
             proposicao=proposicao,
@@ -139,6 +141,7 @@ class Voto(Base):
 
     @classmethod
     def build(cls, votacao, voto_dict):
+        voto_dict = _strip_all_values(voto_dict)
         if voto_dict.get('ide_cadastro'):
             return cls(
                 votacao=votacao,
@@ -161,6 +164,7 @@ class Orientacao(Base):
 
     @classmethod
     def build(cls, votacao, orientacao_dict):
+        orientacao_dict = _strip_all_values(orientacao_dict)
         return cls(
             votacao=votacao,
             sigla=orientacao_dict['sigla'],
@@ -176,3 +180,10 @@ def _none_if_empty(value):
 def _parse_int(value):
     if value:
         return int(value)
+
+
+def _strip_all_values(the_dict):
+    for key, value in the_dict.items():
+        if hasattr(the_dict[key], 'strip'):
+            the_dict[key] = value.strip()
+    return the_dict
