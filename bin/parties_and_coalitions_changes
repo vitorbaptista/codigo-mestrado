@@ -1,0 +1,5 @@
+#!/usr/bin/env python3
+
+from pipeline.parties_and_coalitions_changes import PartiesAndCoalitionsChanges
+
+PartiesAndCoalitionsChanges().run()
