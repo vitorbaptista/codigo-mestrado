@@ -37,8 +37,8 @@ class PartiesAndCoalitionsChanges(object):
             end_date = coalizao["DataFinal"]
             votos_coalizao = self._get_parlamentares_between(start_date,
                                                              end_date)
-            results = results + self._blah(votos_coalizao,
-                                           partidos_na_coalizao)
+            results = results + self._add_coalizao_column(votos_coalizao,
+                                                          partidos_na_coalizao)
 
         # uniqify
         key = lambda v: v["name"] + v["party"] + str(v["coalizao"])
@@ -47,7 +47,7 @@ class PartiesAndCoalitionsChanges(object):
         sort_keys = lambda v: (v["id"] or -1, v["rollcall_date"])
         return sorted(results, key=sort_keys)
 
-    def _blah(self, votos_coalizao, partidos_coalizao):
+    def _add_coalizao_column(self, votos_coalizao, partidos_coalizao):
         result = [collections.OrderedDict(v) for v in votos_coalizao]
         for voto in result:
             voto["coalizao"] = voto["party"] in partidos_coalizao
