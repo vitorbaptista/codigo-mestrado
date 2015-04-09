@@ -17,7 +17,6 @@ class VotesToCSV(object):
     def run(self):
         options = self.parser.parse_args(sys.argv[1:])
 
-        self.filename = str(options.legislature)
         start_date, end_date = self._legislature_dates(options.legislature)
         inside_year = models.Votacao.data.between(start_date,
                                                   end_date)
@@ -32,9 +31,13 @@ class VotesToCSV(object):
                      .filter(inside_year)\
                      .order_by(models.Votacao.data)\
                      .all()
-        return self._write_to_csv(votos, votacoes)
 
-    def _write_to_csv(self, votos, votacoes):
+        votos_path = options.votes_output_path
+        votacoes_path = options.rollcalls_output_path
+
+        return self._write_to_csv(votos, votacoes, votos_path, votacoes_path)
+
+    def _write_to_csv(self, votos, votacoes, votos_path, votacoes_path):
         votacoes = [self._shallow_convert_to_dict(v) for v in votacoes]
         votacoes_ids = [v['id'] for v in votacoes]
 
@@ -47,7 +50,7 @@ class VotesToCSV(object):
             res += [self._convert_to_vote_list(parlamentar_id,
                                                list(votos_parlamentar))]
 
-        with open('%s.csv' % self.filename, 'w', newline='') as csv_file:
+        with open(votos_path, 'w', newline='') as csv_file:
             keys = ['id', 'nome', 'party', 'uf']
             fieldnames = keys + list(votacoes_ids)
             writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
@@ -55,8 +58,7 @@ class VotesToCSV(object):
             writer.writeheader()
             writer.writerows(res)
 
-        votacoes_filename = '%s-votacoes.csv' % self.filename
-        with open(votacoes_filename, 'w', newline='') as csv_file:
+        with open(votacoes_path, 'w', newline='') as csv_file:
             keys = ['id', 'id_sessao', 'proposicao_id',
                     'data', 'resumo', 'obj_votacao']
             fieldnames = keys
@@ -110,5 +112,13 @@ class VotesToCSV(object):
         parser.add_argument(
             "--legislature", type=_validate_legislature, default=54,
             help="output the votes from which legislature (default: 54)"
+        )
+        parser.add_argument(
+            "--votes-output-path", default="votos.csv",
+            help="path to the votes' csv file (default: votos.csv)"
+        )
+        parser.add_argument(
+            "--rollcalls-output-path", default="votacoes.csv",
+            help="path to the rollcalls' csv file (default: votacoes.csv)"
         )
         return parser
