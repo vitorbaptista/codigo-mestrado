@@ -51,7 +51,7 @@ class VotesToCSV(object):
                                                list(votos_parlamentar))]
 
         with open(votos_path, 'w', newline='') as csv_file:
-            keys = ['id', 'nome', 'party', 'uf']
+            keys = ['id', 'name', 'party', 'state']
             fieldnames = keys + list(votacoes_ids)
             writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
 
@@ -89,9 +89,9 @@ class VotesToCSV(object):
     def _convert_to_vote_list(self, the_id, votos):
         res = {
             'id': the_id,
-            'nome': votos[0].parlamentar_nome,
+            'name': votos[0].parlamentar_nome,
             'party': votos[0].parlamentar_partido,
-            'uf': votos[0].parlamentar_uf,
+            'state': votos[0].parlamentar_uf,
         }
         votos_dict = {v.votacao_id: self._convert_vote_type(v.voto)
                       for v in votos}
