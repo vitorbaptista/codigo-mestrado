@@ -69,6 +69,7 @@ class PartiesAndCoalitionsChanges(object):
         votos = db.session.query(models.Voto)\
                   .join(models.Votacao)\
                   .filter(between)\
+                  .filter(models.Voto.parlamentar_partido != 'S.Part.')\
                   .group_by(models.Voto.parlamentar_id)\
                   .group_by(models.Voto.parlamentar_partido)\
                   .order_by(models.Voto.parlamentar_id)\
