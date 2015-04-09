@@ -72,6 +72,24 @@ def _normalize_parties_names():
 
     db.session.commit()
 
+
+def _normalize_names():
+    votos = db.session.query(models.Voto)\
+              .group_by(models.Voto.parlamentar_id)\
+              .filter(models.Voto.parlamentar_id != None)\
+              .all()
+    for voto in votos:
+        db.session.query(models.Voto)\
+          .filter(models.Voto.parlamentar_id == voto.parlamentar_id)\
+          .update({models.Voto.parlamentar_nome: voto.parlamentar_nome})
+
+        db.session.query(models.Proposicao)\
+          .filter(models.Proposicao.autor_id == voto.parlamentar_id)\
+          .update({models.Proposicao.autor: voto.parlamentar_nome})
+
+    db.session.commit()
+
 if __name__ == '__main__':
     _create_and_populate_db()
     _normalize_parties_names()
+    _normalize_names()
