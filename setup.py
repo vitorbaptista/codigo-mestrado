@@ -15,6 +15,7 @@ setup(
     install_requires=[
         'numpy>=0.9',
         'pandas>=0.15',
+        'SQLAlchemy>=0.9.8',
     ],
 
     author='Vitor Baptista',

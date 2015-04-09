@@ -70,3 +70,5 @@ Session.vim
 
 ### Data ###
 *.csv
+*.db
+*.json
