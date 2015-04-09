@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
+
 import csv
 import copy
+import sys
+import argparse
 from itertools import groupby
 
 import pipeline.db as db
@@ -9,31 +12,35 @@ import pipeline.models as models
 
 class VotesToCSV(object):
     def __init__(self):
-        self.filename = 'oc-54'
-        # 52a legislatura: 2003-02-01 -> 2007-01-31
-        # 53a legislatura: 2007-02-01 -> 2011-01-31
-        # 54a legislatura: 2011-02-01 -> 2015-01-31
-        inside_year = models.Votacao.data.between('2011-02-01',
-                                                  '2015-01-31')
-        self.votos = db.session.query(models.Voto)\
-                       .order_by(models.Voto.parlamentar_id)\
-                       .order_by(models.Voto.parlamentar_partido)\
-                       .join(models.Votacao)\
-                       .filter(inside_year)\
-                       .all()
-
-        self.votacoes = db.session.query(models.Votacao)\
-                          .filter(inside_year)\
-                          .order_by(models.Votacao.data)\
-                          .all()
+        self.parser = self._create_parser()
 
     def run(self):
-        votacoes = [self._shallow_convert_to_dict(v) for v in self.votacoes]
+        options = self.parser.parse_args(sys.argv[1:])
+
+        self.filename = str(options.legislature)
+        start_date, end_date = self._legislature_dates(options.legislature)
+        inside_year = models.Votacao.data.between(start_date,
+                                                  end_date)
+        votos = db.session.query(models.Voto)\
+                  .order_by(models.Voto.parlamentar_id)\
+                  .order_by(models.Voto.parlamentar_partido)\
+                  .join(models.Votacao)\
+                  .filter(inside_year)\
+                  .all()
+
+        votacoes = db.session.query(models.Votacao)\
+                     .filter(inside_year)\
+                     .order_by(models.Votacao.data)\
+                     .all()
+        return self._write_to_csv(votos, votacoes)
+
+    def _write_to_csv(self, votos, votacoes):
+        votacoes = [self._shallow_convert_to_dict(v) for v in votacoes]
         votacoes_ids = [v['id'] for v in votacoes]
 
         res = []
-        votos_groupped = groupby(self.votos, lambda p: (p.parlamentar_id,
-                                                        p.parlamentar_partido))
+        votos_groupped = groupby(votos, lambda p: (p.parlamentar_id,
+                                                   p.parlamentar_partido))
         for (parlamentar_id, _), votos_parlamentar in votos_groupped:
             if not parlamentar_id:
                 continue
@@ -58,6 +65,14 @@ class VotesToCSV(object):
             writer.writeheader()
             writer.writerows(votacoes)
 
+    def _legislature_dates(self, legislature):
+        if legislature < 48:
+            return
+        start_year = 1987 + (legislature - 48) * 4
+        end_year = start_year + 4
+
+        return '%d-02-01' % start_year, '%d-01-31' % end_year
+
     def _convert_vote_type(self, voto):
         if voto == 'Sim':
             return 1
@@ -80,3 +95,20 @@ class VotesToCSV(object):
                       for v in votos}
         res.update(votos_dict)
         return res
+
+    def _create_parser(self):
+        def _validate_legislature(legislature):
+            legislature = int(legislature)
+            if legislature < 48:
+                msg = "Legislature must be greater or equal to 48"
+                raise argparse.ArgumentTypeError(msg)
+            return legislature
+
+        parser = argparse.ArgumentParser(
+            description="Converts votes in the DB to a CSV file"
+        )
+        parser.add_argument(
+            "--legislature", type=_validate_legislature, default=54,
+            help="output the votes from which legislature (default: 54)"
+        )
+        return parser
