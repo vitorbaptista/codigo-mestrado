@@ -41,12 +41,12 @@ class PartiesAndCoalitionsChanges(object):
                                                           partidos_na_coalizao)
 
         # uniqify
-        key = lambda v: v["name"] + str(v["coalizao"])
+        key = lambda v: "%d%s" % (v["id"], v["coalizao"])
         # I'm using reversed to keep the first date, as it's sorted by date asc
         results = list({key(r): r for r in reversed(results)}.values())
 
         results = self._remove_unique_rows(results, "id")
-        sort_keys = lambda v: (v["id"] or -1, v["rollcall_date"])
+        sort_keys = lambda v: (v["id"], v["rollcall_date"])
         return sorted(results, key=sort_keys)
 
     def _remove_unique_rows(self, rows, key):

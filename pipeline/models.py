@@ -128,8 +128,8 @@ class Votacao(Base):
 class Voto(Base):
     __tablename__ = 'votos'
 
-    parlamentar_id = Column(Integer, index=True)
-    parlamentar_nome = Column(String, primary_key=True)
+    parlamentar_id = Column(Integer, primary_key=True)
+    parlamentar_nome = Column(String, index=True)
     parlamentar_partido = Column(String, index=True)
     parlamentar_uf = Column(String(2), index=True)
     voto = Column(String, index=True)
@@ -139,14 +139,15 @@ class Voto(Base):
 
     @classmethod
     def build(cls, votacao, voto_dict):
-        return cls(
-            votacao=votacao,
-            parlamentar_id=_parse_int(voto_dict.get('ide_cadastro')),
-            parlamentar_nome=voto_dict['nome'],
-            parlamentar_partido=voto_dict['partido'],
-            parlamentar_uf=voto_dict['uf'],
-            voto=voto_dict['voto'],
-        )
+        if voto_dict.get('ide_cadastro'):
+            return cls(
+                votacao=votacao,
+                parlamentar_id=_parse_int(voto_dict['ide_cadastro']),
+                parlamentar_nome=voto_dict['nome'],
+                parlamentar_partido=voto_dict['partido'],
+                parlamentar_uf=voto_dict['uf'],
+                voto=voto_dict['voto'],
+            )
 
 
 class Orientacao(Base):
