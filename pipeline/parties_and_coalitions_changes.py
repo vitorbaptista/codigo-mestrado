@@ -20,12 +20,12 @@ class PartiesAndCoalitionsChanges(object):
             writer.writerows(result)
 
     def _legislators_groupped_by_party_and_coalition(self):
-        """Returns a list of legislators with one entry per party and coalition
+        """Returns a list of legislators with one entry per coalition change
 
-        For example, if a legislator switched parties twice for parties that
-        were on the government coalition, it'll appear twice. If another
-        legislator didn't change the party, but her party got out of the
-        coalition, it'll appear twice as well.
+        For example, if a legislators' party got in and out of the coalition,
+        him will be returned twice (once when he was in the coalition, and once
+        when he was out). If he switched parties but they both were in (or out)
+        the coalition, he would be returned only once (the first one).
         """
         coalizoes = self._get_coalizoes()
         coalizoes_partidos = self._get_coalizoes_partidos()
@@ -41,7 +41,7 @@ class PartiesAndCoalitionsChanges(object):
                                                           partidos_na_coalizao)
 
         # uniqify
-        key = lambda v: v["name"] + v["party"] + str(v["coalizao"])
+        key = lambda v: v["name"] + str(v["coalizao"])
         # I'm using reversed to keep the first date, as it's sorted by date asc
         results = list({key(r): r for r in reversed(results)}.values())
 
