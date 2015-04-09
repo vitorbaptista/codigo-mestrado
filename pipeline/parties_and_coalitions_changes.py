@@ -42,10 +42,20 @@ class PartiesAndCoalitionsChanges(object):
 
         # uniqify
         key = lambda v: v["name"] + v["party"] + str(v["coalizao"])
+        # I'm using reversed to keep the first date, as it's sorted by date asc
         results = list({key(r): r for r in reversed(results)}.values())
 
+        results = self._remove_unique_rows(results, "id")
         sort_keys = lambda v: (v["id"] or -1, v["rollcall_date"])
         return sorted(results, key=sort_keys)
+
+    def _remove_unique_rows(self, rows, key):
+        keys = [row[key] for row in rows]
+        unique_values = [val for val, count
+                         in collections.Counter(keys).items()
+                         if count == 1]
+
+        return [row for row in rows if row[key] not in unique_values]
 
     def _add_coalizao_column(self, votos_coalizao, partidos_coalizao):
         result = [collections.OrderedDict(v) for v in votos_coalizao]
