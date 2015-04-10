@@ -4,6 +4,7 @@ import os
 import csv
 import collections
 from datetime import datetime
+from itertools import groupby
 
 import pipeline.db as db
 import pipeline.models as models
@@ -40,22 +41,50 @@ class PartiesAndCoalitionsChanges(object):
             results = results + self._add_coalizao_column(votos_coalizao,
                                                           partidos_na_coalizao)
 
-        # uniqify
-        key = lambda v: "%d%s" % (v["id"], v["coalizao"])
-        # I'm using reversed to keep the first date, as it's sorted by date asc
-        results = list({key(r): r for r in reversed(results)}.values())
-
-        results = self._remove_unique_rows(results, "id")
+        results = self._remove_uniques_and_convert_to_change_list(results)
         sort_keys = lambda v: (v["id"], v["rollcall_date"])
         return sorted(results, key=sort_keys)
 
-    def _remove_unique_rows(self, rows, key):
-        keys = [row[key] for row in rows]
-        unique_values = [val for val, count
-                         in collections.Counter(keys).items()
-                         if count == 1]
+    def _remove_uniques_and_convert_to_change_list(self, rows):
+        result = []
+        get_id = lambda element: element["id"]
+        for _, elements in groupby(sorted(rows, key=get_id), get_id):
+            elements = [r for r in elements]
+            if len(elements) == 1:
+                # Só estamos interessados em mudanças de coalizão, então
+                # ignoramos quem nunca mudou
+                continue
+            elements = self._remove_consecutive_duplicates(elements,
+                                                           "coalizao")
+            for i in range(1, len(elements)):
+                before = elements[i - 1]
+                actual = elements[i]
+                if before["coalizao"] == actual["coalizao"]:
+                    continue
+                result.append(collections.OrderedDict([
+                    ("id", before["id"]),
+                    ("name", before["name"]),
+                    ("party_before", before["party"]),
+                    ("party_after", actual["party"]),
+                    ("rollcall_id", actual["rollcall_id"]),
+                    ("rollcall_date", actual["rollcall_date"]),
+                    ("coalition_before", before["coalizao"]),
+                    ("coalition_after", actual["coalizao"]),
+                ]))
+        return result
 
-        return [row for row in rows if row[key] not in unique_values]
+    def _remove_consecutive_duplicates(self, elements, key):
+        """Remove elementos duplicatos consecutivos, mantendo só o primeiro
+
+        Esse método modifica a lista `elements`
+        """
+        i = 0
+        while i < len(elements) - 1:
+            if elements[i][key] == elements[i + 1][key]:
+                del elements[i + 1]
+            else:
+                i = i + 1
+        return elements
 
     def _add_coalizao_column(self, votos_coalizao, partidos_coalizao):
         result = [collections.OrderedDict(v) for v in votos_coalizao]
