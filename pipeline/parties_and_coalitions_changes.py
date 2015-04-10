@@ -54,8 +54,6 @@ class PartiesAndCoalitionsChanges(object):
                 # Só estamos interessados em mudanças de coalizão, então
                 # ignoramos quem nunca mudou
                 continue
-            elements = self._remove_consecutive_duplicates(elements,
-                                                           "coalizao")
             for i in range(1, len(elements)):
                 before = elements[i - 1]
                 actual = elements[i]
@@ -72,19 +70,6 @@ class PartiesAndCoalitionsChanges(object):
                     ("coalition_after", actual["coalizao"]),
                 ]))
         return result
-
-    def _remove_consecutive_duplicates(self, elements, key):
-        """Remove elementos duplicatos consecutivos, mantendo só o primeiro
-
-        Esse método modifica a lista `elements`
-        """
-        i = 0
-        while i < len(elements) - 1:
-            if elements[i][key] == elements[i + 1][key]:
-                del elements[i + 1]
-            else:
-                i = i + 1
-        return elements
 
     def _add_coalizao_column(self, votos_coalizao, partidos_coalizao):
         result = [collections.OrderedDict(v) for v in votos_coalizao]
