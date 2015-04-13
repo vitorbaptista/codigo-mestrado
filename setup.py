@@ -9,7 +9,8 @@ setup(
     name='pipeline',
     version=__version__,
     packages=['pipeline', 'pipeline.metrics'],
-    scripts=['bin/rice_index', 'bin/rollmean', 'bin/breakout_detection'],
+    scripts=['bin/rice_index', 'bin/rollmean', 'bin/breakout_detection',
+             'bin/parties_and_coalitions_changes', 'bin/votes_to_csv'],
     test_suite='pipeline.test',
 
     install_requires=[
