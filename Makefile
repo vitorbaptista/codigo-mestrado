@@ -18,5 +18,8 @@ names: ${VOTES_PATH} ${ROLLCALLS_PATH}
 %.csv %-votacoes.csv: ${DB_PATH}
 	./bin/votes_to_csv --legislature $* --votes-output-path $*.csv --rollcalls-output-path $*-votacoes.csv
 
+parties_and_coalitions_changes.csv: ${DB_PATH}
+	./bin/parties_and_coalitions_changes
+
 data/dados.db:
 	python pipeline/create_db.py
