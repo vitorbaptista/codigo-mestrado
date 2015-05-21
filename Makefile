@@ -1,6 +1,7 @@
 LEGISLATURE = 54
 VOTES_PATH = ${LEGISLATURE}.csv
 ROLLCALLS_PATH = ${LEGISLATURE}-votacoes.csv
+DB_PATH = data/dados.db
 
 all: ${VOTES_PATH} ${ROLLCALLS_PATH}
 	./bin/rice_index --input ${VOTES_PATH} --majority-percentual 0.975 --party ${PARTIES} --groupby party --metric adjusted_rice_index\
@@ -14,5 +15,8 @@ names: ${VOTES_PATH} ${ROLLCALLS_PATH}
 		| ./bin/breakout_detection --metadata-csv-path ${ROLLCALLS_PATH} --plot-path output.png --plot-title "${NAMES} (${LEGISLATURE} legislatura)"
 	gnome-open output.png
 
-%.csv %-votacoes.csv:
+%.csv %-votacoes.csv: ${DB_PATH}
 	./bin/votes_to_csv --legislature $* --votes-output-path $*.csv --rollcalls-output-path $*-votacoes.csv
+
+data/dados.db:
+	python pipeline/create_db.py
