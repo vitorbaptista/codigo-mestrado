@@ -2,6 +2,7 @@
 
 import os
 import csv
+import math
 import collections
 from datetime import datetime
 from itertools import groupby
@@ -30,7 +31,7 @@ class PartiesAndCoalitionsChanges(object):
         """
         coalizoes = self._get_coalizoes()
         coalizoes_partidos = self._get_coalizoes_partidos()
-        results = []
+        intermediary_results = []
         for coalizao in coalizoes:
             partidos_na_coalizao = coalizoes_partidos[coalizao["Id_Clz"]]
 
@@ -38,16 +39,46 @@ class PartiesAndCoalitionsChanges(object):
             end_date = coalizao["DataFinal"]
             votos_coalizao = self._get_parlamentares_between(start_date,
                                                              end_date)
-            results = results + self._add_coalizao_column(votos_coalizao,
-                                                          partidos_na_coalizao)
 
-        results = self._remove_uniques_and_convert_to_change_list(results)
+            intermediary_results += self._add_coalizao_column(votos_coalizao,
+                                                              partidos_na_coalizao)
+
+        results_legislatures = [self._get_legislature(x["rollcall_date"])
+                                for x in intermediary_results]
+        results = []
+        for legislature in set(results_legislatures):
+            start_index = results_legislatures.index(legislature)
+            try:
+                end_index = results_legislatures.index(legislature + 1)
+            except ValueError:
+                end_index = -1
+            values = intermediary_results[start_index:end_index]
+            if legislature == 54:
+                import pdb
+                pdb.set_trace()
+            results += self._remove_uniques_and_convert_to_change_list(values)
+
         sort_keys = lambda v: (v["id"], v["rollcall_date"])
         return sorted(results, key=sort_keys)
+
+    def _get_legislature(self, date):
+        base_year = 1987
+        base_legislature = 48
+        years_since_base = date.year - base_year
+        legislatures_since_base = years_since_base / 4.0
+        fractional, _ = math.modf(legislatures_since_base)
+        probable_legislature = base_legislature +\
+            math.floor(legislatures_since_base)
+        if fractional == 0 and date.month == 1:
+            return probable_legislature - 1
+        else:
+            return probable_legislature
 
     def _remove_uniques_and_convert_to_change_list(self, rows):
         result = []
         get_id = lambda element: element["id"]
+        get_rollcall_date = lambda element: element["rollcall_date"]
+        rows = sorted(rows, key=get_rollcall_date)
         for _, elements in groupby(sorted(rows, key=get_id), get_id):
             elements = [r for r in elements]
             if len(elements) == 1:
@@ -80,14 +111,16 @@ class PartiesAndCoalitionsChanges(object):
     def _get_parlamentares_between(self, start_date, end_date):
         between = models.Votacao.data.between(start_date,
                                               end_date)
-        votos = db.session.query(models.Voto)\
-                  .join(models.Votacao)\
-                  .filter(between)\
-                  .filter(models.Voto.parlamentar_partido != 'S.Part.')\
-                  .group_by(models.Voto.parlamentar_id)\
-                  .group_by(models.Voto.parlamentar_partido)\
-                  .order_by(models.Voto.parlamentar_id)\
-                  .order_by(models.Votacao.data)\
+        stmt = db.session.query(models.Voto)\
+                 .join(models.Votacao)\
+                 .filter(between)\
+                 .filter(models.Voto.parlamentar_partido != 'S.Part.')\
+                 .order_by(models.Voto.parlamentar_id)\
+                 .order_by(models.Votacao.data.desc())\
+                 .subquery()
+        votos = db.session.query().add_entity(models.Voto, alias=stmt)\
+                  .group_by(stmt.c.parlamentar_id)\
+                  .group_by(stmt.c.parlamentar_partido)\
                   .all()
         votos = [self._convert_to_dict(v) for v in votos]
         return votos
@@ -115,10 +148,53 @@ class PartiesAndCoalitionsChanges(object):
             result = {}
             for coalizao_partido in reader:
                 id_coalizao = coalizao_partido["Id_Clz"]
-                partido = coalizao_partido["Sigla_Partido"]
+                partido = self._normalize_party_name(coalizao_partido["Sigla_Partido"])
                 result[id_coalizao] = result.get(id_coalizao, [])
                 result[id_coalizao].append(partido)
             return result
+
+    def _normalize_party_name(self, party_name):
+        normalizations = (
+            {
+                'names': ('pcb', 'pps'),
+                'result': 'PCB>PPS'
+            },
+            {
+                'names': ('pds', 'pp'),
+                'result': 'PDS>PP'
+
+            },
+            {
+                'names': ('pfl', 'dem'),
+                'result': 'PFL>DEM'
+            },
+            {
+                'names': ('pj', 'ptc'),
+                'result': 'PJ>PTC'
+            },
+            {
+                'names': ('pmr', 'prb'),
+                'result': 'PMR>PRB'
+            },
+            {
+                'names': ('pl', 'prona', 'pr'),
+                'result': 'PL+PRONA>PR'
+            },
+            {
+                'names': ('sdd', 'solidaried'),
+                'result': 'SD'
+            },
+            {
+                'names': ('pcdob'),
+                'result': 'PCdoB'
+            }
+        )
+
+        for normalization in normalizations:
+            if party_name.lower() in normalization['names']:
+                return normalization['result']
+
+        return party_name
 
     def _convert_to_dict(self, parlamentar):
         return collections.OrderedDict([

@@ -42,9 +42,8 @@ class VotesToCSV(object):
         votacoes_ids = [v['id'] for v in votacoes]
 
         res = []
-        votos_groupped = groupby(votos, lambda p: (p.parlamentar_id,
-                                                   p.parlamentar_partido))
-        for (parlamentar_id, _), votos_parlamentar in votos_groupped:
+        votos_groupped = groupby(votos, lambda p: (p.parlamentar_id))
+        for (parlamentar_id), votos_parlamentar in votos_groupped:
             if not parlamentar_id:
                 continue
             res += [self._convert_to_vote_list(parlamentar_id,

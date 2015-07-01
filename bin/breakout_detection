@@ -95,7 +95,7 @@ data["V1"] <- NULL
 merged_data <- merge(data, metadata)
 merged_data$timestamp <- merged_data[['data']]
 merged_data <- merged_data[order(merged_data$timestamp),]
-result <- breakout(merged_data, method="multi")
+result <- breakout(merged_data, method="amoc")
 
 breakout_data <- calculate_breakout_medians(merged_data, result)
 if (!is.null(plot_path)) {
