@@ -178,7 +178,7 @@ class PartiesAndCoalitionsChanges(object):
             },
             {
                 'names': ('pl', 'prona', 'pr'),
-                'result': 'PL+PRONA>PR'
+                'result': 'PL>PR'
             },
             {
                 'names': ('sdd', 'solidaried'),

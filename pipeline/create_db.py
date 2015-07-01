@@ -40,9 +40,9 @@ def _normalize_parties_names():
             'PFL>DEM': renomeia_partido('PFL', 'DEM'),
             'PJ>PTC': renomeia_partido('PJ', 'PTC'),
             'PMR>PRB': renomeia_partido('PMR', 'PRB'),
-            'PL+PRONA>PR': {
+            'PL>PR': {
                 'filter': model_party.in_(['PL', 'PRONA', 'PR']),
-                'update': {model_party_attr_name: 'PL+PRONA>PR'},
+                'update': {model_party_attr_name: 'PL>PR'},
             },
             'SD': {
                 'filter': model_party.in_(['SDD', 'Solidaried']),
