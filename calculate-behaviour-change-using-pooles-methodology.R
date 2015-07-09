@@ -214,7 +214,11 @@ foreach(start_date = start_dates,
   print("# Processing time:")
   print(proc.time() - start_time)
 
-  saveRDS(result, file = paste(legislature, "-", TRIALS, "-", start_vote$id, "_", end_vote$id, ".rds", sep=""))
+  saveRDS(result, file = paste(legislature, "-",
+                               TRIALS, "-",
+                               start_vote$id, "_",
+                               mid_vote$id, "_",
+                               end_vote$id, ".rds", sep=""))
 
   print("# Writing time:")
   print(proc.time() - start_time)
