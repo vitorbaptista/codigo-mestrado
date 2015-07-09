@@ -95,65 +95,6 @@ getPolarityName <- function(votes, party) {
   return(votes_by_party[polarity_index,][[1, "name"]])
 }
 
-runAnalysis <- function (votes, votes_metadata, baseline_party, changed_coalitions) {
-  # TODO: Definir uma data inicial melhor pra considerar a mudança de coalizão
-  median_index <- floor(nrow(votes_metadata) / 2)
-  start_rollcall <- votes_metadata[order(votes_metadata$data),][floor(median_index/2),]
-  end_rollcall <- votes_metadata[order(votes_metadata$data),][median_index + floor(median_index/2),]
-  changed_coalitions_in_period <- changed_coalitions[between(changed_coalitions$rollcall_date,
-                                                             as.POSIXct("2011-01-01"), #start_rollcall$data,
-                                                             as.POSIXct("2015-02-01") #end_rollcall$data
-  ),]
-  
-  todosOC <- calculateOC(votes, votes_metadata, baseline_party)
-  todosOC$legislators$coord1D <- scale(todosOC$legislators$coord1D)
-  
-  legislators <- todosOC$legislators[which(todosOC$legislators$party != baseline_party),
-                                     c("id", "name", "party", "state")]
-  legislatorsIds <- unique(legislators$id)
-  
-  amauriTeixeira <- todosOC$legislators[todosOC$legislators$name == "José Genoíno",]
-  luizCouto <- todosOC$legislators[todosOC$legislators$name == "Luiz Couto",]
-  
-  result <- foreach(i = 1:length(legislatorsIds), .combine = rbind) %do% {
-    legislatorId <- legislatorsIds[i]
-    legislator <- legislators[legislators$id == legislatorId,][1,]
-    coord1D <- todosOC$legislators[todosOC$legislators$id == legislator$id, 'coord1D']
-    legislator$legislature <- legislature
-    legislator$start_date <- start_rollcall$data
-    legislator$end_date <- end_rollcall$data
-    legislator$start_rollcall_id <- start_rollcall$id
-    legislator$end_rollcall_id <- end_rollcall$id
-    legislator$sd <- sd(coord1D, na.rm=T)
-    legislator$min <- min(coord1D, na.rm=T)
-    legislator$max <- max(coord1D, na.rm=T)
-    legislator$diff <- coord1D[[2]] - coord1D[[1]]
-    legislator$coord1DAmauriTeixeira <- amauriTeixeira$coord1D
-    legislator$coord1DLuizCouto <- luizCouto$coord1D
-    
-    this_legislator_changed_coalitions_dates <- changed_coalitions[changed_coalitions$id == legislator$id,]$rollcall_date - votes_metadata[order(votes_metadata$data),][median_index,]$data
-    if (length(this_legislator_changed_coalitions_dates) > 0) {
-      blah <- as.numeric(
-        this_legislator_changed_coalitions_dates[
-          which.min(
-            abs(this_legislator_changed_coalitions_dates)
-          )
-          ],
-        units = "days"
-      )
-    } else {
-      blah <- NA
-    }
-    legislator$changed_coalition_date_diff <- blah
-    
-    cbind(legislator, data.frame(t(coord1D)))
-  }
-  result <- result[order(result$sd),]
-  result$changed_coalition <- result$id %in% changed_coalitions_in_period$id
-  result <- as.data.frame(lapply(result, unlist))
-  return(result)
-}
-
 baseline_party <- 'PT'
 legislature <- 50
 csvFile <- paste(legislature, ".csv", sep="")
