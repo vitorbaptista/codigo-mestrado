@@ -6,7 +6,7 @@ for (pkg in pkgs) {
   library(pkg, character.only = TRUE)
 }
 
-TRIALS = 1
+TRIALS = 10
 
 minorityVoteShare <- function(votes) {
   countVotesTypes <- table(votes)
