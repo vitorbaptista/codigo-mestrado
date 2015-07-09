@@ -199,7 +199,7 @@ foreach(start_date = start_dates,
   result <- foreach(i = seq(1, nrow(legislators), 1),
                     .inorder = FALSE,
                     .errorhandling = "remove",
-                    .packages = c("wnominate", "foreach", "data.table")) %do% {
+                    .packages = c("wnominate", "foreach", "data.table")) %dopar% {
     set.seed(1)
     legislator <- legislators[i,]
     # As 4 primeiras colunas são metadados dos parlamentares, e as outras são
