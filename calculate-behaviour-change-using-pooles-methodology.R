@@ -123,10 +123,6 @@ votes_metadata <- votes_metadata[order(votes_metadata$data),]
 legislators <- votes[-which(votes$name == "José Genoíno"),
                      c("id", "name", "party", "state")]
 
-start_dates <- seq(as.POSIXct("1995-02-01"), as.POSIXct("1998-02-01"), by = "months")
-secs_in_365_days <- 365*24*60*60 # one year
-halved_secs_in_365_days <- floor(secs_in_365_days / 2)
-
 closest_vote <- function(votes_metadata, date) {
   # Returns latest rollcall on first day with rollcalls after "date", or
   # earliest rollcall on first day with rollcalls before "date"
@@ -164,11 +160,25 @@ closest_vote_before <- function(votes_metadata, date) {
   }
 }
 
-already_calculated_run_ids = c()
-foreach(start_date = start_dates, .errorhandling = "remove") %do% {
-  end_date = start_date + secs_in_365_days
-  mid_date = start_date + halved_secs_in_365_days
+add_to_date <- function(date, period) {
+  # Add "period" to date. Period can be anything that seq() accepts, like "6
+  # months" or "1 year"
+  seq(date, by = period, length = 2)[[2]]
+}
 
+start_dates <- seq(as.POSIXct("1995-02-01"), as.POSIXct("1998-02-01"), by = "months")
+mid_dates <- seq(add_to_date(start_dates[[1]], "6 months"),
+                 length = length(start_dates),
+                 by = "months")
+end_dates <- seq(add_to_date(start_dates[[1]], "1 year"),
+                 length = length(start_dates),
+                 by = "months")
+
+already_calculated_run_ids = c()
+foreach(start_date = start_dates,
+        mid_date = mid_dates,
+        end_date = end_dates,
+        .errorhandling = "remove") %do% {
   start_vote = closest_vote_after(votes_metadata, start_date)
   end_vote = closest_vote_before(votes_metadata, end_date)
   mid_vote = closest_vote(votes_metadata, mid_date)
