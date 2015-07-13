@@ -59,7 +59,6 @@ doTheThing <- function(votes, vote_metadata) {
   votes_after[!is.na(mask)] = not_in_legislature_code
   
   return(list(votes_before, votes_after))
-  return(c(list(votes + mask), list(votes + inverse_mask)))
 }
 
 calculateOC <- function(votes, votes_metadata, baseline_party) {
