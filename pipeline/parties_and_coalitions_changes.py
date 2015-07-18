@@ -160,25 +160,25 @@ class PartiesAndCoalitionsChanges(object):
                 'result': 'PCB>PPS'
             },
             {
-                'names': ('pds', 'pp'),
-                'result': 'PDS>PP'
-
-            },
-            {
                 'names': ('pfl', 'dem'),
                 'result': 'PFL>DEM'
-            },
-            {
-                'names': ('pj', 'ptc'),
-                'result': 'PJ>PTC'
             },
             {
                 'names': ('pmr', 'prb'),
                 'result': 'PMR>PRB'
             },
             {
-                'names': ('pl', 'prona', 'pr'),
+                'names': ('pl', 'pr'),
                 'result': 'PL>PR'
+            },
+            {
+                'names': ('pds', 'ppr', 'ppb', 'pp'),
+                'result': 'PDS>PP'
+
+            },
+            {
+                'names': ('pj', 'prn', 'ptc'),
+                'result': 'PJ>PTC'
             },
             {
                 'names': ('sdd', 'solidaried'),

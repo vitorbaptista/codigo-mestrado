@@ -27,22 +27,25 @@ def _normalize_parties_names():
     The source data comes from the CEBRAP database's table tbl_Partido.
     """
     def _generate_normalizations(model_party, model_party_attr_name):
-        def renomeia_partido(nome_antigo, nome_novo):
-            nome = '%s>%s' % (nome_antigo, nome_novo)
+        def renomeia_partido(*nomes):
+            nome = '>'.join(nomes)
             return {
-                'filter': model_party.in_([nome_antigo, nome_novo]),
+                'filter': model_party.in_(nomes),
                 'update': {model_party_attr_name: nome},
             }
 
         normalizations = {
             'PCB>PPS': renomeia_partido('PCB', 'PPS'),
-            'PDS>PP': renomeia_partido('PDS', 'PP'),
             'PFL>DEM': renomeia_partido('PFL', 'DEM'),
-            'PJ>PTC': renomeia_partido('PJ', 'PTC'),
             'PMR>PRB': renomeia_partido('PMR', 'PRB'),
-            'PL>PR': {
-                'filter': model_party.in_(['PL', 'PRONA', 'PR']),
-                'update': {model_party_attr_name: 'PL>PR'},
+            'PL>PR': renomeia_partido('PL', 'PR'),
+            'PDS>PP': {
+                'filter': model_party.in_(['PDS', 'PPR', 'PPB', 'PP']),
+                'update': {model_party_attr_name: 'PDS>PP'},
+            },
+            'PJ>PTC': {
+                'filter': model_party.in_(['PJ', 'PRN', 'PTC']),
+                'update': {model_party_attr_name: 'PJ>PTC'},
             },
             'SD': {
                 'filter': model_party.in_(['SDD', 'Solidaried']),
