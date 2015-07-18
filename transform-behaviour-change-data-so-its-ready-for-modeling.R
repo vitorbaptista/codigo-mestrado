@@ -24,20 +24,49 @@ convert_results <- function(result) {
   clean_coords[!is.na(clean_coords$diff),]
 }
 
-setwd("~/Projetos/Mestrado/theRealPipeline/results/")
+setwd("~/Projetos/Mestrado/theRealPipeline/")
 
 file_regexp = "^([0-9]+)-([0-9]+)-([0-9]+)_([0-9]+)_([0-9]+)\\.rds$"
 clean_coords = data.frame()
 
-for (path in list.files(".", pattern = file_regexp)) {
+for (path in list.files("results/", pattern = file_regexp)) {
   path_parts = str_match(path, file_regexp)
-  aux = convert_results(readRDS(path))
+  aux = convert_results(readRDS(paste0("results/", path)))
   if (nrow(aux) != 0) {
     aux$legislature = path_parts[1, 2]
     aux$trials = path_parts[1, 3]
-    aux$start_vote_index = path_parts[1, 4]
-    aux$mid_vote_index = path_parts[1, 5]
-    aux$end_vote_index = path_parts[1, 6]
+    aux$start_vote_id = path_parts[1, 4]
+    aux$mid_vote_id = path_parts[1, 5]
+    aux$end_vote_id = path_parts[1, 6]
     clean_coords = rbind(clean_coords, aux)
   }
 }
+
+changed_coalitions = read.csv("parties_and_coalitions_changes.csv")
+changed_coalitions$rollcall_date = as.POSIXct(changed_coalitions$rollcall_date)
+clean_coords$changed_coalition = "N"
+for (legislature in unique(clean_coords$legislature)) {
+  votacoes = read.csv(paste0(legislature, "-votacoes.csv"))
+  votacoes$data = as.POSIXct(votacoes$data)
+
+  legislature_start_date = as.Date(format(min(votacoes$data), "%Y-02-01"))
+  legislature_end_date = as.Date(paste0(year(legislature_start_date) + 4, "-01-31"))
+  changed_coalitions_in_legislature = changed_coalitions[between(as.Date(changed_coalitions$rollcall_date),
+                                                                 legislature_start_date,
+                                                                 legislature_end_date),,drop=FALSE]
+
+  six_months = 60*60*24*30*6
+  clean_coords[clean_coords$legislature == legislature,] = t(apply(clean_coords[clean_coords$legislature == legislature,], 1, function (row) {
+    mid_vote = votacoes[votacoes$id == row[["mid_vote_id"]],]
+    end_vote = votacoes[votacoes$id == row[["end_vote_id"]],]
+
+    changed_coalitions_in_period = changed_coalitions[changed_coalitions$id == row[["id"]] &
+                                                        between(changed_coalitions$rollcall_date,
+                                                                mid_vote$data,
+                                                                end_vote$data + six_months),,drop=FALSE]
+    row["changed_coalition"] = ifelse(nrow(changed_coalitions_in_period) == 0, "N", "S")
+    row
+  }))
+}
+
+write.csv(clean_coords, file = "data.csv", row.names = FALSE)
