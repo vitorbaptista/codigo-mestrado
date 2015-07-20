@@ -55,15 +55,15 @@ for (legislature in unique(clean_coords$legislature)) {
                                                                  legislature_start_date,
                                                                  legislature_end_date),,drop=FALSE]
 
-  six_months = 60*60*24*30*6
+  six_months = 6*30
   clean_coords[clean_coords$legislature == legislature,] = t(apply(clean_coords[clean_coords$legislature == legislature,], 1, function (row) {
     mid_vote = votacoes[votacoes$id == row[["mid_vote_id"]],]
     end_vote = votacoes[votacoes$id == row[["end_vote_id"]],]
 
     changed_coalitions_in_period = changed_coalitions_in_legislature[changed_coalitions_in_legislature$id == row[["id"]] &
-                                                                     between(changed_coalitions_in_legislature$rollcall_date,
-                                                                             mid_vote$data,
-                                                                             end_vote$data + six_months),,drop=FALSE]
+                                                                     between(as.Date(changed_coalitions_in_legislature$rollcall_date),
+                                                                             as.Date(mid_vote$data),
+                                                                             as.Date(end_vote$data) + six_months),,drop=FALSE]
 
     row["changed_coalition"] = ifelse(nrow(changed_coalitions_in_period) == 0, "N", "S")
     row
