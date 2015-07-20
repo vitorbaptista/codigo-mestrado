@@ -24,9 +24,8 @@ convert_results <- function(result) {
   clean_coords[!is.na(clean_coords$diff),]
 }
 
-setwd("~/Projetos/Mestrado/theRealPipeline/")
-
-file_regexp = "^([0-9]+)-([0-9]+)-([0-9]+)_([0-9]+)_([0-9]+)\\.rds$"
+TRIALS = 10
+file_regexp = paste0("^([0-9]+)-(", TRIALS, ")-([0-9]+)_([0-9]+)_([0-9]+)\\.rds$")
 clean_coords = data.frame()
 
 for (path in list.files("results/", pattern = file_regexp)) {
