@@ -42,9 +42,25 @@ for (path in list.files("results/", pattern = file_regexp)) {
   }
 }
 
+closest_to = function(element, element_list) {
+  if (length(element_list) > 0) {
+    closest_index = which.min(abs(element_list - element))
+    element_list[[closest_index]]
+  } else {
+    NA
+  }
+}
+
+six_months = 6*30
 changed_coalitions = read.csv("parties_and_coalitions_changes.csv")
 changed_coalitions$rollcall_date = as.POSIXct(changed_coalitions$rollcall_date)
 clean_coords$changed_coalition = "N"
+clean_coords$start_vote_date = NA
+clean_coords$mid_vote_date = NA
+clean_coords$end_vote_date = NA
+clean_coords$coalition_change_closest_to_start_vote = NA
+clean_coords$coalition_change_closest_to_mid_vote = NA
+clean_coords$coalition_change_closest_to_end_vote = NA
 for (legislature in unique(clean_coords$legislature)) {
   votacoes = read.csv(paste0(legislature, "-votacoes.csv"))
   votacoes$data = as.POSIXct(votacoes$data)
@@ -55,8 +71,9 @@ for (legislature in unique(clean_coords$legislature)) {
                                                                  legislature_start_date,
                                                                  legislature_end_date),,drop=FALSE]
 
-  six_months = 6*30
-  clean_coords[clean_coords$legislature == legislature,] = t(apply(clean_coords[clean_coords$legislature == legislature,], 1, function (row) {
+  for (row_number in which(clean_coords$legislature == legislature)) {
+    row = clean_coords[row_number,]
+    start_vote = votacoes[votacoes$id == row[["start_vote_id"]],]
     mid_vote = votacoes[votacoes$id == row[["mid_vote_id"]],]
     end_vote = votacoes[votacoes$id == row[["end_vote_id"]],]
 
@@ -65,10 +82,20 @@ for (legislature in unique(clean_coords$legislature)) {
                                                                              as.Date(mid_vote$data),
                                                                              as.Date(end_vote$data) + six_months),,drop=FALSE]
 
+    my_changed_coalitions_in_legislature = changed_coalitions_in_legislature[changed_coalitions_in_legislature$id == row[["id"]],]
+    row["coalition_change_closest_to_start_vote"] = closest_to(start_vote$data, my_changed_coalitions_in_legislature$rollcall_date)
+    row["coalition_change_closest_to_mid_vote"] = closest_to(mid_vote$data, my_changed_coalitions_in_legislature$rollcall_date)
+    row["coalition_change_closest_to_end_vote"] = closest_to(end_vote$data, my_changed_coalitions_in_legislature$rollcall_date)
     row["changed_coalition"] = ifelse(nrow(changed_coalitions_in_period) == 0, "N", "S")
-    row
-  }))
+    clean_coords[row_number,] = row
+  }
 }
+clean_coords$start_vote_date = as.POSIXct(clean_coords$start_vote_date, origin="1970-01-01")
+clean_coords$mid_vote_date = as.POSIXct(clean_coords$mid_vote_date, origin="1970-01-01")
+clean_coords$end_vote_date = as.POSIXct(clean_coords$end_vote_date, origin="1970-01-01")
+clean_coords$coalition_change_closest_to_start_vote = as.POSIXct(clean_coords$coalition_change_closest_to_start_vote, origin="1970-01-01")
+clean_coords$coalition_change_closest_to_mid_vote = as.POSIXct(clean_coords$coalition_change_closest_to_mid_vote, origin="1970-01-01")
+clean_coords$coalition_change_closest_to_end_vote = as.POSIXct(clean_coords$coalition_change_closest_to_end_vote, origin="1970-01-01")
 
 write.csv(clean_coords, file = "data.csv",
           row.names = FALSE, quote = FALSE, na = "")
