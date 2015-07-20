@@ -31,13 +31,14 @@ clean_coords = data.frame()
 
 for (path in list.files("results/", pattern = file_regexp)) {
   path_parts = str_match(path, file_regexp)
+  path_parts = as.numeric(path_parts[1, 2:ncol(path_parts)])
   aux = convert_results(readRDS(paste0("results/", path)))
   if (nrow(aux) != 0) {
-    aux$legislature = path_parts[1, 2]
-    aux$trials = path_parts[1, 3]
-    aux$start_vote_id = path_parts[1, 4]
-    aux$mid_vote_id = path_parts[1, 5]
-    aux$end_vote_id = path_parts[1, 6]
+    aux$legislature = path_parts[1]
+    aux$trials = path_parts[2]
+    aux$start_vote_id = path_parts[3]
+    aux$mid_vote_id = path_parts[4]
+    aux$end_vote_id = path_parts[5]
     clean_coords = rbind(clean_coords, aux)
   }
 }
