@@ -70,4 +70,5 @@ for (legislature in unique(clean_coords$legislature)) {
   }))
 }
 
-write.csv(clean_coords, file = "data.csv", row.names = FALSE)
+write.csv(clean_coords, file = "data.csv",
+          row.names = FALSE, quote = FALSE, na = "")
