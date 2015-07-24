@@ -43,17 +43,11 @@ class PartiesAndCoalitionsChanges(object):
 
             intermediary_results += self._add_extra_columns_and_convert_to_dict(votos_coalizao,
                                                                                 partidos_na_coalizao)
-        intermediary_results = sorted(intermediary_results, key=itemgetter("rollcall_date"))
+        intermediary_results = sorted(intermediary_results,
+                                      key=itemgetter("rollcall_date"))
 
-        results_legislatures = [x["legislature"] for x in intermediary_results]
         results = []
-        for legislature in set(results_legislatures):
-            start_index = results_legislatures.index(legislature)
-            try:
-                end_index = results_legislatures.index(legislature + 1)
-            except ValueError:
-                end_index = -1
-            values = intermediary_results[start_index:end_index]
+        for _, values in groupby(intermediary_results, itemgetter("legislature")):
             results += self._remove_uniques_and_convert_to_change_list(values)
 
         sort_keys = lambda v: (v["id"], v["rollcall_date"])
