@@ -53,9 +53,6 @@ class PartiesAndCoalitionsChanges(object):
             except ValueError:
                 end_index = -1
             values = intermediary_results[start_index:end_index]
-            if legislature == 54:
-                import pdb
-                pdb.set_trace()
             results += self._remove_uniques_and_convert_to_change_list(values)
 
         sort_keys = lambda v: (v["id"], v["rollcall_date"])
