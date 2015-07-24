@@ -41,13 +41,11 @@ class PartiesAndCoalitionsChanges(object):
             votos_coalizao = self._get_parlamentares_between(start_date,
                                                              end_date)
 
-            intermediary_results += self._add_coalizao_column(votos_coalizao,
-                                                              partidos_na_coalizao)
-
+            intermediary_results += self._add_extra_columns_and_convert_to_dict(votos_coalizao,
+                                                                                partidos_na_coalizao)
         intermediary_results = sorted(intermediary_results, key=itemgetter("rollcall_date"))
-        results_legislatures = [self._get_legislature(x["rollcall_date"])
-                                for x in intermediary_results]
 
+        results_legislatures = [x["legislature"] for x in intermediary_results]
         results = []
         for legislature in set(results_legislatures):
             start_index = results_legislatures.index(legislature)
@@ -60,19 +58,6 @@ class PartiesAndCoalitionsChanges(object):
 
         sort_keys = lambda v: (v["id"], v["rollcall_date"])
         return sorted(results, key=sort_keys)
-
-    def _get_legislature(self, date):
-        base_year = 1987
-        base_legislature = 48
-        years_since_base = date.year - base_year
-        legislatures_since_base = years_since_base / 4.0
-        fractional, _ = math.modf(legislatures_since_base)
-        probable_legislature = base_legislature +\
-            math.floor(legislatures_since_base)
-        if fractional == 0 and date.month == 1:
-            return probable_legislature - 1
-        else:
-            return probable_legislature
 
     def _remove_uniques_and_convert_to_change_list(self, rows):
         result = []
@@ -98,14 +83,39 @@ class PartiesAndCoalitionsChanges(object):
                     ("rollcall_date", actual["rollcall_date"]),
                     ("coalition_before", before["coalizao"]),
                     ("coalition_after", actual["coalizao"]),
+                    ("legislature", actual["legislature"]),
+                    ("legislature_year", actual["legislature_year"]),
                 ]))
         return result
 
-    def _add_coalizao_column(self, votos_coalizao, partidos_coalizao):
+    def _add_extra_columns_and_convert_to_dict(self, votos_coalizao, partidos_coalizao):
         result = [collections.OrderedDict(v) for v in votos_coalizao]
         for voto in result:
             voto["coalizao"] = voto["party"] in partidos_coalizao
+            voto["legislature"] = self._get_legislature(voto["rollcall_date"])
+            voto["legislature_year"] = self._get_legislature_year(voto["rollcall_date"])
         return result
+
+    def _get_legislature(self, date):
+        base_year = 1987
+        base_legislature = 48
+        years_since_base = date.year - base_year
+        legislatures_since_base = years_since_base / 4.0
+        fractional, _ = math.modf(legislatures_since_base)
+        probable_legislature = base_legislature +\
+            math.floor(legislatures_since_base)
+        if fractional == 0 and date.month == 1:
+            return probable_legislature - 1
+        else:
+            return probable_legislature
+
+    def _get_legislature_year(self, date):
+        base_year = 1987
+        probable_year = 1 + ((date.year % base_year) % 4)
+        if probable_year == 1 and date.month == 1:
+            return 4
+        else:
+            return probable_year
 
     def _get_parlamentares_between(self, start_date, end_date):
         between = models.Votacao.data.between(start_date,
@@ -173,7 +183,6 @@ class PartiesAndCoalitionsChanges(object):
             {
                 'names': ('pds', 'ppr', 'ppb', 'pp'),
                 'result': 'PDS>PP'
-
             },
             {
                 'names': ('pj', 'prn', 'ptc'),
