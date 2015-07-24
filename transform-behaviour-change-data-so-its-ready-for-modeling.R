@@ -87,6 +87,9 @@ for (legislature in unique(clean_coords$legislature)) {
     row["coalition_change_closest_to_mid_vote"] = closest_to(mid_vote$data, my_changed_coalitions_in_legislature$rollcall_date)
     row["coalition_change_closest_to_end_vote"] = closest_to(end_vote$data, my_changed_coalitions_in_legislature$rollcall_date)
     row["changed_coalition"] = ifelse(nrow(changed_coalitions_in_period) == 0, "N", "S")
+    row["start_vote_date"] = start_vote$data
+    row["mid_vote_date"] = mid_vote$data
+    row["end_vote_date"] = end_vote$data
     clean_coords[row_number,] = row
   }
 }
