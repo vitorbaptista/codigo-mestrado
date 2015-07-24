@@ -41,23 +41,29 @@ class PartiesAndCoalitionsChanges(object):
             votos_coalizao = self._get_parlamentares_between(start_date,
                                                              end_date)
 
-            intermediary_results += self._add_extra_columns_and_convert_to_dict(votos_coalizao,
-                                                                                partidos_na_coalizao)
+            data = self._add_extra_columns_and_convert_to_dict(votos_coalizao,
+                                                               partidos_na_coalizao)
+            for row in data:
+                row["coalition_start_date"] = start_date
+
+            intermediary_results += data
+
         intermediary_results = sorted(intermediary_results,
-                                      key=itemgetter("rollcall_date"))
+                                      key=itemgetter("coalition_start_date"))
 
         results = []
         for _, values in groupby(intermediary_results, itemgetter("legislature")):
             results += self._remove_uniques_and_convert_to_change_list(values)
 
-        sort_keys = lambda v: (v["id"], v["rollcall_date"])
+        sort_keys = lambda v: (v["id"], v["coalition_start_date"], v["rollcall_date"])
         return sorted(results, key=sort_keys)
 
     def _remove_uniques_and_convert_to_change_list(self, rows):
         result = []
         get_id = itemgetter("id")
-        rows = sorted(rows, key=itemgetter("rollcall_date"))
-        for _, elements in groupby(sorted(rows, key=get_id), get_id):
+        sort_keys = lambda v: (v["id"], v["coalition_start_date"], v["rollcall_date"])
+        rows = sorted(rows, key=sort_keys)
+        for _, elements in groupby(rows, get_id):
             elements = [r for r in elements]
             if len(elements) == 1:
                 # Só estamos interessados em mudanças de coalizão, então
@@ -75,6 +81,7 @@ class PartiesAndCoalitionsChanges(object):
                     ("party_after", actual["party"]),
                     ("rollcall_id", actual["rollcall_id"]),
                     ("rollcall_date", actual["rollcall_date"]),
+                    ("coalition_start_date", actual["coalition_start_date"]),
                     ("coalition_before", before["coalizao"]),
                     ("coalition_after", actual["coalizao"]),
                     ("legislature", actual["legislature"]),
