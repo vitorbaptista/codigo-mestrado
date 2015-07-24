@@ -76,9 +76,8 @@ class PartiesAndCoalitionsChanges(object):
 
     def _remove_uniques_and_convert_to_change_list(self, rows):
         result = []
-        get_id = lambda element: element["id"]
-        get_rollcall_date = lambda element: element["rollcall_date"]
-        rows = sorted(rows, key=get_rollcall_date)
+        get_id = itemgetter("id")
+        rows = sorted(rows, key=itemgetter("rollcall_date"))
         for _, elements in groupby(sorted(rows, key=get_id), get_id):
             elements = [r for r in elements]
             if len(elements) == 1:
