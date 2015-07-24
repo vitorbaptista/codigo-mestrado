@@ -91,25 +91,23 @@ class PartiesAndCoalitionsChanges(object):
         return result
 
     def _get_legislature(self, date):
+        """Retorna a legislatura a partir da data.
+
+        Apesar da legislatura oficialmente começar em 01/Fev, consideramos que
+        ela começa em 01/Jan, pois esta é a data do início das coalizões de uma
+        nova legislatura nos dados do CEBRAP.
+        """
         base_year = 1987
         base_legislature = 48
         years_since_base = date.year - base_year
         legislatures_since_base = years_since_base / 4.0
         fractional, _ = math.modf(legislatures_since_base)
-        probable_legislature = base_legislature +\
-            math.floor(legislatures_since_base)
-        if fractional == 0 and date.month == 1:
-            return probable_legislature - 1
-        else:
-            return probable_legislature
+        return base_legislature + math.floor(legislatures_since_base)
 
     def _get_legislature_year(self, date):
+        """Retorna o ano da legislatura (1, 2, 3 ou 4) a partir da data."""
         base_year = 1987
-        probable_year = 1 + ((date.year % base_year) % 4)
-        if probable_year == 1 and date.month == 1:
-            return 4
-        else:
-            return probable_year
+        return 1 + ((date.year % base_year) % 4)
 
     def _get_parlamentares_between(self, start_date, end_date):
         between = models.Votacao.data.between(start_date,
