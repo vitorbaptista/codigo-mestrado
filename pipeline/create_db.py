@@ -40,7 +40,7 @@ def _normalize_parties_names():
             'PMR>PRB': renomeia_partido('PMR', 'PRB'),
             'PL>PR': renomeia_partido('PL', 'PR'),
             'PDS>PP': {
-                'filter': model_party.in_(['PDS', 'PPR', 'PPB', 'PP']),
+                'filter': model_party.in_(['PDS', 'PDC', 'PPR', 'PPB', 'PP']),
                 'update': {model_party_attr_name: 'PDS>PP'},
             },
             'PJ>PTC': {

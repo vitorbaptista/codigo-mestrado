@@ -180,7 +180,7 @@ class PartiesAndCoalitionsChanges(object):
                 'result': 'PL>PR'
             },
             {
-                'names': ('pds', 'ppr', 'ppb', 'pp'),
+                'names': ('pds', 'pdc', 'ppr', 'ppb', 'pp'),
                 'result': 'PDS>PP'
             },
             {
@@ -194,6 +194,10 @@ class PartiesAndCoalitionsChanges(object):
             {
                 'names': ('pcdob'),
                 'result': 'PCdoB'
+            },
+            {
+                'names': ('pv1'),
+                'result': 'PV'
             }
         )
 
