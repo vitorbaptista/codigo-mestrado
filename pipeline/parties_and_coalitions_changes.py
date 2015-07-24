@@ -4,6 +4,7 @@ import os
 import csv
 import math
 import collections
+from operator import itemgetter
 from datetime import datetime
 from itertools import groupby
 
@@ -43,8 +44,10 @@ class PartiesAndCoalitionsChanges(object):
             intermediary_results += self._add_coalizao_column(votos_coalizao,
                                                               partidos_na_coalizao)
 
+        intermediary_results = sorted(intermediary_results, key=itemgetter("rollcall_date"))
         results_legislatures = [self._get_legislature(x["rollcall_date"])
                                 for x in intermediary_results]
+
         results = []
         for legislature in set(results_legislatures):
             start_index = results_legislatures.index(legislature)
