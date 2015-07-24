@@ -79,8 +79,8 @@ for (legislature in unique(clean_coords$legislature)) {
 
     changed_coalitions_in_period = changed_coalitions_in_legislature[changed_coalitions_in_legislature$id == row[["id"]] &
                                                                      between(as.Date(changed_coalitions_in_legislature$rollcall_date),
-                                                                             as.Date(mid_vote$data),
-                                                                             as.Date(end_vote$data) + six_months),,drop=FALSE]
+                                                                             as.Date(end_vote$data) - six_months/2,
+                                                                             as.Date(end_vote$data) + six_months/2),,drop=FALSE]
 
     my_changed_coalitions_in_legislature = changed_coalitions_in_legislature[changed_coalitions_in_legislature$id == row[["id"]],]
     row["coalition_change_closest_to_start_vote"] = closest_to(start_vote$data, my_changed_coalitions_in_legislature$rollcall_date)
