@@ -133,7 +133,7 @@ class PartiesAndCoalitionsChanges(object):
             return [self._parse_coalizao(row) for row in reader]
 
     def _parse_coalizao(self, coalizao):
-        parse_date = lambda d: datetime.strptime(d, "%Y-%m-%d %H:%M:%S")
+        parse_date = lambda d: datetime.strptime(d, "%Y-%m-%d %H:%M:%S").date()
         date_keys = ["DataInicial", "DataArgelina",
                      "DataMediana", "DataFinal",
                      "DataLeg"]
