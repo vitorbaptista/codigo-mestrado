@@ -21,7 +21,7 @@ convert_results <- function(result) {
                diff = diff(rows[, "coord1D"]))
   })
 
-  clean_coords[!is.na(clean_coords$diff),]
+  clean_coords
 }
 
 TRIALS = 10
